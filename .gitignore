@@ -10,6 +10,7 @@ frontend_backup/
 # Editör
 .vscode/
 .idea/
+.claude/
 
 # Loglar
 *.log
