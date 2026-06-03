@@ -1,0 +1,15 @@
+# macOS sistem dosyaları
+.DS_Store
+
+# Geliştirici notları (lokal)
+devlog.md
+
+# Backup
+frontend_backup/
+
+# Editör
+.vscode/
+.idea/
+
+# Loglar
+*.log
