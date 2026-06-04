@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: jobradar-postgres
+    environment:
+      POSTGRES_USER: jobradar
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: jobradar_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
