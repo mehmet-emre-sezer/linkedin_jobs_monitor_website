@@ -186,3 +186,33 @@ export const MOCK_QUERY_STATS: QueryStat[] = [
   { query: "AI Engineer Trainee",      jobCount: 8,  averageScore: 76 },
   { query: "Computer Vision Intern",   jobCount: 5,  averageScore: 70 },
 ]
+
+// ── Admin mock verileri ─────────────────────────────────────────
+
+export interface AdminOverview {
+  totalUsers: number
+  activeUsers: number       // son 7 gün giriş yapmış
+  registeredToday: number
+  errorsLast24h: number
+}
+
+export const MOCK_ADMIN_OVERVIEW: AdminOverview = {
+  totalUsers: 247,
+  activeUsers: 124,
+  registeredToday: 8,
+  errorsLast24h: 3,
+}
+
+// Funnel — kullanıcı yolculuğu
+export interface FunnelStep {
+  label: string
+  userCount: number
+}
+
+export const MOCK_FUNNEL: FunnelStep[] = [
+  { label: "Kayıt oldu",         userCount: 247 },
+  { label: "E-posta doğruladı",  userCount: 198 },
+  { label: "Onboarding başladı", userCount: 165 },
+  { label: "CV yükledi",         userCount: 132 },
+  { label: "Telegram bağladı",   userCount: 89  },
+]
