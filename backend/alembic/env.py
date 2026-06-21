@@ -7,7 +7,7 @@ from alembic import context
 
 # Projedeki ayarları ve modelleri içeri al
 from core.config import settings
-from core.database import Base
+from core.database import Base, _normalize_db_url
 
 # Modeller burada import edilmeli ki Alembic onları görsün.
 # Yeni model eklediğimizde buraya import satırı eklenir.
@@ -21,7 +21,7 @@ from models.error_log import ErrorLog  # noqa: F401
 config = context.config
 
 # Alembic'e DB URL'sini .env'den alacak şekilde ayarla
-config.set_main_option("sqlalchemy.url", settings.database_url)
+config.set_main_option("sqlalchemy.url", _normalize_db_url(settings.database_url))
 
 # Loglama config'i
 if config.config_file_name is not None:
