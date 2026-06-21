@@ -2,13 +2,19 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { APP_NAME } from "@/constants/app"
+import { api, extractErrorMessage } from "@/lib/api"
+import { useAuth } from "@/lib/auth-context"
+import type { TokenResponse } from "@/lib/auth-types"
 import RightPanel from "@/components/auth/RightPanel"
 import GoogleButton from "@/components/auth/GoogleButton"
 import EyeIcon from "@/components/auth/EyeIcon"
 import StepChips from "@/components/auth/StepChips"
 
 export default function LoginPage() {
+  const router = useRouter()
+  const { login } = useAuth()
   const [email, setEmail]       = useState("")
   const [password, setPassword] = useState("")
   const [showPw, setShowPw]     = useState(false)
@@ -22,9 +28,15 @@ export default function LoginPage() {
     if (!isFormValid) return
     setError("")
     setLoading(true)
-    // TODO: bkz devlog — Login API entegrasyonu
-    await new Promise((r) => setTimeout(r, 900))
-    setLoading(false)
+    try {
+      const { data } = await api.post<TokenResponse>("/auth/login", { email, password })
+      login(data)
+      router.push(data.user.is_email_verified ? "/dashboard" : "/onboarding")
+    } catch (err) {
+      setError(extractErrorMessage(err))
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -41,7 +53,7 @@ export default function LoginPage() {
             <h1 className="text-3xl font-bold text-white mb-1">Giriş yap</h1>
             <p className="text-gray-500 mb-8">Hesabına hoş geldin.</p>
 
-            <GoogleButton />
+            <GoogleButton onError={setError} />
 
             <div className="flex items-center gap-3 my-6">
               <div className="flex-1 h-px bg-white/[0.07]" />
@@ -91,7 +103,7 @@ export default function LoginPage() {
 
               <p className="text-center text-sm text-gray-500 mt-3">
                 Parolanı mı unuttun?{" "}
-                <Link href="/reset-password" className="text-white hover:text-blue-400 transition-colors font-medium">
+                <Link href="/forgot-password" className="text-white hover:text-blue-400 transition-colors font-medium">
                   Parolanı sıfırla
                 </Link>
               </p>

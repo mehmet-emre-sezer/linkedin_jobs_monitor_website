@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { APP_NAME } from "@/constants/app"
+import { api, extractErrorMessage } from "@/lib/api"
 import RightPanel from "@/components/auth/RightPanel"
 import GoogleButton from "@/components/auth/GoogleButton"
 import EyeIcon from "@/components/auth/EyeIcon"
@@ -50,10 +51,14 @@ export default function RegisterPage() {
     if (!isFormValid) return
     setError("")
     setLoading(true)
-    // TODO: bkz devlog — Register API entegrasyonu
-    await new Promise((r) => setTimeout(r, 900))
-    setLoading(false)
-    setSubmitted(true)
+    try {
+      await api.post("/auth/register", { email, password })
+      setSubmitted(true)
+    } catch (err) {
+      setError(extractErrorMessage(err))
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -73,7 +78,7 @@ export default function RegisterPage() {
               <h1 className="text-3xl font-bold text-white mb-1">Hesap oluştur</h1>
               <p className="text-gray-500 mb-8">Ücretsiz başla, kart bilgisi yok.</p>
 
-              <GoogleButton />
+              <GoogleButton onError={setError} />
 
               <div className="flex items-center gap-3 my-6">
                 <div className="flex-1 h-px bg-white/[0.07]" />

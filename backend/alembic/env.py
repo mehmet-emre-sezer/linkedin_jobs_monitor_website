@@ -12,6 +12,11 @@ from core.database import Base
 # Modeller burada import edilmeli ki Alembic onları görsün.
 # Yeni model eklediğimizde buraya import satırı eklenir.
 from models.user import User  # noqa: F401
+from models.profile import Profile  # noqa: F401
+from models.job import Job  # noqa: F401
+from models.scan_run import ScanRun  # noqa: F401
+from models.search_query import SearchQuery  # noqa: F401
+from models.error_log import ErrorLog  # noqa: F401
 
 config = context.config
 

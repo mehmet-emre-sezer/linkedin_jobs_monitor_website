@@ -15,3 +15,11 @@ class InvalidCredentialsError(DomainError):
 
 class UserNotFoundError(DomainError):
     """Kullanıcı bulunamadı."""
+
+
+class InvalidFileTypeError(DomainError):
+    """Geçersiz dosya tipi."""
+
+
+class FileTooLargeError(DomainError):
+    """Dosya boyutu limiti aştı."""

@@ -2,6 +2,7 @@ fastapi==0.115.0
 uvicorn[standard]==0.32.0
 pydantic-settings==2.6.0
 email-validator==2.2.0
+python-multipart==0.0.20
 
 # Database
 sqlalchemy==2.0.36
@@ -10,3 +11,21 @@ alembic==1.13.3
 
 # Security
 bcrypt==4.2.0
+pyjwt==2.10.0
+
+# Email
+resend==2.4.0
+
+# OAuth
+google-auth==2.36.0
+requests==2.32.3
+
+# Scraper + LLM
+selenium==4.27.1
+webdriver-manager==4.0.2
+pdfplumber==0.11.5
+groq==0.13.0
+
+# Background tasks
+celery==5.4.0
+redis==5.2.1
