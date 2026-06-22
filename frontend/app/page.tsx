@@ -24,7 +24,8 @@ function TelegramMock() {
         <div className="flex items-center gap-3 pb-3 mb-3 border-b border-white/10">
           <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-sm">🤖</div>
           <div>
-            <div className="text-white text-sm font-medium">{APP_NAME} Bot</div>
+            {/* Bot persona adı — markanın "senin pusulan" hâli, bilinçli kelime oyunu */}
+            <div className="text-white text-sm font-medium">İş Pusulan</div>
             <div className="text-gray-500 text-xs">çevrimiçi</div>
           </div>
         </div>

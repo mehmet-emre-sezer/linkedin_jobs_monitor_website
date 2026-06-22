@@ -1,11 +1,11 @@
 import type { Metadata } from "next"
 import "./globals.css"
 import Providers from "./providers"
+import { APP_NAME, APP_TAGLINE } from "@/constants/app"
 
-// TODO: APP_NAME belirlendikten sonra güncelle
 export const metadata: Metadata = {
-  title: "JobRadar",
-  description: "LinkedIn iş ilanlarını senin için takip eder.",
+  title: APP_NAME,
+  description: `${APP_TAGLINE}.`,
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

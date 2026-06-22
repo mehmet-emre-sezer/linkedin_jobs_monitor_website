@@ -13,6 +13,9 @@ from core.security import (
     create_purpose_token,
 )
 
+# Kullanıcıya görünen marka adı (email başlık/konu)
+APP_BRAND = "İş Pusulası"
+
 
 def _send_email(to: str, subject: str, html: str) -> None:
     """Resend ile email gönder. API key yoksa konsola yaz."""
@@ -43,13 +46,13 @@ def send_verification_email(user_id: int, to: str) -> None:
     )
     verify_url = f"{settings.frontend_url}/verify-email?token={token}"
     html = f"""
-    <h2>JobRadar'a hoş geldin 👋</h2>
+    <h2>{APP_BRAND} • Hoş geldin 👋</h2>
     <p>Hesabını aktifleştirmek için aşağıdaki butona tıkla:</p>
     <p><a href="{verify_url}" style="display:inline-block;padding:12px 24px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px">E-postamı doğrula</a></p>
     <p>Veya bu linki tarayıcına yapıştır:<br><a href="{verify_url}">{verify_url}</a></p>
     <p>Bu link 24 saat içinde geçersiz olacak.</p>
     """
-    _send_email(to=to, subject="JobRadar — E-postanı doğrula", html=html)
+    _send_email(to=to, subject=f"{APP_BRAND} — E-postanı doğrula", html=html)
 
 
 def send_password_reset_email(user_id: int, to: str) -> None:
@@ -68,4 +71,4 @@ def send_password_reset_email(user_id: int, to: str) -> None:
     <p>Bu link 1 saat içinde geçersiz olacak.</p>
     <p>Eğer bu işlemi sen başlatmadıysan bu maili görmezden gelebilirsin.</p>
     """
-    _send_email(to=to, subject="JobRadar — Parola sıfırlama", html=html)
+    _send_email(to=to, subject=f"{APP_BRAND} — Parola sıfırlama", html=html)

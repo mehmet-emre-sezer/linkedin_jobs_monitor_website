@@ -69,7 +69,7 @@
   <circle cx="102" cy="450" r="12" fill="#2563eb"/>
   <text x="102" y="455" text-anchor="middle" font-size="11" fill="white">✈</text>
   <!-- Mesaj içeriği -->
-  <text x="122" y="447" font-size="9" fill="#60a5fa" font-family="system-ui, sans-serif" font-weight="600">JobRadar Bot</text>
+  <text x="122" y="447" font-size="9" fill="#60a5fa" font-family="system-ui, sans-serif" font-weight="600">İş Pusulan</text>
   <text x="122" y="460" font-size="8" fill="#94a3b8" font-family="system-ui, sans-serif">🆕 Yeni ilan — 87 puan</text>
   <text x="100" y="480" font-size="8" fill="#475569" font-family="system-ui, sans-serif">Junior ML Engineer · Teknoloji A.Ş.</text>
   <text x="100" y="496" font-size="7.5" fill="#2563eb" font-family="system-ui, sans-serif">İlana git →</text>

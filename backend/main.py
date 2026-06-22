@@ -44,7 +44,7 @@ app.include_router(admin.router)
 
 @app.get("/")
 def root():
-    return {"message": "JobRadar API çalışıyor 🚀"}
+    return {"message": "İş Pusulası API çalışıyor 🚀"}
 
 
 @app.get("/health")
