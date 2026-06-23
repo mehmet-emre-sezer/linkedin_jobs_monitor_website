@@ -1,8 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { APP_NAME } from "@/constants/app"
+import { useAuth } from "@/lib/auth-context"
 
 interface NavItem {
   href: string
@@ -18,6 +19,16 @@ const navItems: NavItem[] = [
 
 export default function AdminSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const { user, logout } = useAuth()
+
+  function handleLogout() {
+    logout()
+    router.push("/login")
+  }
+
+  const initial = user?.email?.[0]?.toUpperCase() ?? "?"
+  const username = user?.email?.split("@")[0] ?? "—"
 
   function isActive(href: string) {
     if (href === "/admin") return pathname === "/admin"
@@ -56,14 +67,17 @@ export default function AdminSidebar() {
       <div className="border-t border-white/[0.06] p-3">
         <div className="flex items-center gap-3 px-2 py-2">
           <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/40 text-blue-300 text-xs font-semibold flex items-center justify-center">
-            E
+            {initial}
           </div>
           <div className="min-w-0">
-            <div className="text-white text-xs font-medium truncate">Emre Sezer</div>
+            <div className="text-white text-xs font-medium truncate">{username}</div>
             <div className="text-gray-600 text-[10px] truncate">admin</div>
           </div>
         </div>
-        <button className="w-full text-left mt-1 px-2 py-2 rounded-lg text-xs text-red-400 hover:bg-red-500/10 transition-colors">
+        <button
+          onClick={handleLogout}
+          className="w-full text-left mt-1 px-2 py-2 rounded-lg text-xs text-red-400 hover:bg-red-500/10 transition-colors"
+        >
           Çıkış yap
         </button>
       </div>

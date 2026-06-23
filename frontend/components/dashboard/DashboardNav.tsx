@@ -2,10 +2,20 @@
 
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { APP_NAME } from "@/constants/app"
+import { useAuth } from "@/lib/auth-context"
 
 export default function DashboardNav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const router = useRouter()
+  const { user, logout } = useAuth()
+  const initial = user?.email?.[0]?.toUpperCase() ?? "?"
+
+  function handleLogout() {
+    logout()
+    router.push("/login")
+  }
 
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -33,7 +43,7 @@ export default function DashboardNav() {
             onClick={() => setIsMenuOpen((v) => !v)}
             className="w-9 h-9 rounded-full bg-blue-500/20 border border-blue-500/40 text-blue-300 text-sm font-semibold flex items-center justify-center hover:bg-blue-500/30 transition-colors"
           >
-            E
+            {initial}
           </button>
 
           {isMenuOpen && (
@@ -45,7 +55,10 @@ export default function DashboardNav() {
                 Ayarlar
               </Link>
               <div className="border-t border-white/[0.06] my-1" />
-              <button className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors">
+              <button
+                onClick={handleLogout}
+                className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+              >
                 Çıkış yap
               </button>
             </div>
