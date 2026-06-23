@@ -28,10 +28,13 @@ class AdminUserItem(BaseModel):
 
 
 class AdminUserDetail(BaseModel):
-    """Tek kullanıcının profil + tarama istatistikleri."""
+    """Tek kullanıcının hesap + profil + tarama istatistikleri."""
     id: int
     email: str
     name: str | None
+    registered_at: datetime
+    last_seen_at: datetime
+    subscription: str          # ödeme kademesi yok — "free"
     university: str | None
     graduation_year: int | None
     skills: list[str]

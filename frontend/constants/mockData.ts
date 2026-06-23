@@ -196,26 +196,11 @@ export interface AdminOverview {
   errorsLast24h: number
 }
 
-export const MOCK_ADMIN_OVERVIEW: AdminOverview = {
-  totalUsers: 247,
-  activeUsers: 124,
-  registeredToday: 8,
-  errorsLast24h: 3,
-}
-
 // Funnel — kullanıcı yolculuğu
 export interface FunnelStep {
   label: string
   userCount: number
 }
-
-export const MOCK_FUNNEL: FunnelStep[] = [
-  { label: "Kayıt oldu",         userCount: 247 },
-  { label: "E-posta doğruladı",  userCount: 198 },
-  { label: "Onboarding başladı", userCount: 165 },
-  { label: "CV yükledi",         userCount: 132 },
-  { label: "Telegram bağladı",   userCount: 89  },
-]
 
 // Kullanıcı listesi
 export type SubscriptionStatus = "free" | "paid"
@@ -230,17 +215,6 @@ export interface User {
   isTelegramConnected: boolean
 }
 
-export const MOCK_USERS: User[] = [
-  { id: "u1",  name: "Mehmet Emre Sezer", email: "emre@gmail.com",    registeredAt: "2026-05-10", lastSeenAt: "2026-06-04", subscription: "paid", isTelegramConnected: true  },
-  { id: "u2",  name: "Ayşe Yılmaz",       email: "ayse@gmail.com",    registeredAt: "2026-05-15", lastSeenAt: "2026-06-03", subscription: "free", isTelegramConnected: true  },
-  { id: "u3",  name: "Can Demir",         email: "can@outlook.com",   registeredAt: "2026-05-20", lastSeenAt: "2026-06-04", subscription: "paid", isTelegramConnected: true  },
-  { id: "u4",  name: "Zeynep Kaya",       email: "zeynep@gmail.com",  registeredAt: "2026-05-22", lastSeenAt: "2026-05-30", subscription: "free", isTelegramConnected: false },
-  { id: "u5",  name: "Mert Aslan",        email: "mert@gmail.com",    registeredAt: "2026-05-25", lastSeenAt: "2026-06-02", subscription: "paid", isTelegramConnected: true  },
-  { id: "u6",  name: "Selin Aydın",       email: "selin@hotmail.com", registeredAt: "2026-05-28", lastSeenAt: "2026-06-04", subscription: "free", isTelegramConnected: true  },
-  { id: "u7",  name: "Burak Öz",          email: "burak@gmail.com",   registeredAt: "2026-06-01", lastSeenAt: "2026-06-01", subscription: "free", isTelegramConnected: false },
-  { id: "u8",  name: "Ece Çelik",         email: "ece@gmail.com",     registeredAt: "2026-06-02", lastSeenAt: "2026-06-03", subscription: "paid", isTelegramConnected: true  },
-]
-
 // Kullanıcı detay
 export interface UserDetail {
   id: string
@@ -251,13 +225,6 @@ export interface UserDetail {
   totalJobsScanned: number
   totalJobsSent: number
   averageScore: number
-}
-
-export const MOCK_USER_DETAILS: Record<string, UserDetail> = {
-  u1: { id: "u1", university: "İstanbul Teknik Üniversitesi", graduationYear: "2025", skills: ["Python", "Machine Learning", "SQL", "PyTorch"], chatId: "874512983", totalJobsScanned: 1240, totalJobsSent: 84,  averageScore: 76 },
-  u2: { id: "u2", university: "Boğaziçi Üniversitesi",        graduationYear: "2024", skills: ["Python", "Data Analysis", "SQL"],               chatId: "112233445", totalJobsScanned: 890,  totalJobsSent: 52,  averageScore: 71 },
-  u3: { id: "u3", university: "ODTÜ",                          graduationYear: "2025", skills: ["JavaScript", "React", "Node.js"],               chatId: "998877665", totalJobsScanned: 1560, totalJobsSent: 110, averageScore: 78 },
-  u4: { id: "u4", university: "Yıldız Teknik",                graduationYear: "2026", skills: ["Java", "Spring Boot"],                          chatId: null,        totalJobsScanned: 0,    totalJobsSent: 0,   averageScore: 0  },
 }
 
 // Hata logları
@@ -274,59 +241,4 @@ export interface ErrorLog {
   stackTrace: string
 }
 
-export const MOCK_ERROR_LOGS: ErrorLog[] = [
-  {
-    id: "e1",
-    timestamp: "2026-06-04 14:23:12",
-    severity: "error",
-    source: "scraper",
-    userId: "u1",
-    message: "LinkedIn DOM selector bulunamadı: '.job-card-container'",
-    stackTrace: `File "scraper.py", line 87, in extract_jobs
-    cards = driver.find_elements(By.CLASS_NAME, "job-card-container")
-selenium.common.exceptions.NoSuchElementException: Unable to locate element`,
-  },
-  {
-    id: "e2",
-    timestamp: "2026-06-04 13:45:03",
-    severity: "warning",
-    source: "telegram",
-    userId: "u4",
-    message: "Telegram bot kullanıcıya mesaj gönderemedi: chat_id geçersiz",
-    stackTrace: `telegram.error.BadRequest: Chat not found
-File "notifier.py", line 42, in send_notification
-    bot.send_message(chat_id=user.chat_id, text=msg)`,
-  },
-  {
-    id: "e3",
-    timestamp: "2026-06-04 12:10:55",
-    severity: "error",
-    source: "scorer",
-    userId: null,
-    message: "Groq API rate limit aşıldı",
-    stackTrace: `groq.RateLimitError: 429 Too Many Requests
-Retry-After: 60s
-File "scorer.py", line 23, in score_job`,
-  },
-  {
-    id: "e4",
-    timestamp: "2026-06-04 09:32:18",
-    severity: "info",
-    source: "database",
-    userId: null,
-    message: "Database backup tamamlandı",
-    stackTrace: `Backup size: 124 MB
-Duration: 2m 34s
-Location: s3://jobradar-backups/2026-06-04.tar.gz`,
-  },
-  {
-    id: "e5",
-    timestamp: "2026-06-03 18:55:42",
-    severity: "error",
-    source: "auth",
-    userId: "u7",
-    message: "JWT token doğrulama başarısız",
-    stackTrace: `jwt.exceptions.ExpiredSignatureError: Signature has expired
-File "auth.py", line 56, in verify_token`,
-  },
-]
+// Mock error log sabitleri kaldırıldı — /admin/errors artık backend'den çekiyor.
