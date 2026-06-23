@@ -53,6 +53,15 @@ def set_skills(db: Session, user_id: int, data: SkillsUpdate) -> Profile:
     return profile
 
 
+def complete_onboarding(db: Session, user_id: int) -> Profile:
+    """Onboarding'i tamamlandı olarak işaretle (son adımda çağrılır)."""
+    profile = get_or_create_profile(db, user_id)
+    profile.onboarding_completed = True
+    db.commit()
+    db.refresh(profile)
+    return profile
+
+
 def create_telegram_link(db: Session, user_id: int) -> str:
     """Telegram'a bağlanmak için kısa ömürlü deep link döndür."""
     get_or_create_profile(db, user_id)  # profil henüz yoksa hazırla

@@ -7,6 +7,7 @@ import { APP_NAME } from "@/constants/app"
 import { api, extractErrorMessage } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import type { TokenResponse } from "@/lib/auth-types"
+import type { ProfileResponse } from "@/lib/profile-types"
 import RightPanel from "@/components/auth/RightPanel"
 import GoogleButton from "@/components/auth/GoogleButton"
 import EyeIcon from "@/components/auth/EyeIcon"
@@ -31,7 +32,10 @@ export default function LoginPage() {
     try {
       const { data } = await api.post<TokenResponse>("/auth/login", { email, password })
       login(data)
-      router.push(data.user.is_email_verified ? "/dashboard" : "/onboarding")
+      // Onboarding'i bitiren dashboard'a, bitirmeyen onboarding'e gider.
+      // (Email doğrulamasıyla karıştırma — ikisi farklı şey.)
+      const { data: profile } = await api.get<ProfileResponse>("/profile/me")
+      router.push(profile.onboarding_completed ? "/dashboard" : "/onboarding")
     } catch (err) {
       setError(extractErrorMessage(err))
     } finally {

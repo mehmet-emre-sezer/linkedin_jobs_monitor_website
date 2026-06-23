@@ -43,6 +43,16 @@ def update_skills(
     return profile
 
 
+@router.post("/me/complete-onboarding", response_model=ProfileResponse)
+def complete_onboarding(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ProfileResponse:
+    """Onboarding son adımı: tamamlandı olarak işaretle."""
+    profile = profile_service.complete_onboarding(db, current_user.id)
+    return profile
+
+
 @router.post("/me/telegram-link")
 def create_telegram_link(
     current_user: User = Depends(get_current_user),

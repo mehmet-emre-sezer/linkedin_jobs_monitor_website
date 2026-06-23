@@ -45,6 +45,7 @@ class ProfileResponse(BaseModel):
     cv_filename: str | None
     cv_uploaded_at: datetime | None
     telegram_chat_id: str | None
+    onboarding_completed: bool
     updated_at: datetime
 
     class Config:

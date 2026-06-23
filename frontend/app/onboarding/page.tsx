@@ -405,6 +405,7 @@ export default function OnboardingPage() {
       if (step < TOTAL_STEPS) {
         setStep((s) => s + 1)
       } else {
+        await api.post("/profile/me/complete-onboarding")
         router.push("/dashboard")
       }
     } catch (err) {

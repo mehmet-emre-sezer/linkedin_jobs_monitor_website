@@ -6,6 +6,7 @@ export interface ProfileResponse {
   cv_filename: string | null
   cv_uploaded_at: string | null
   telegram_chat_id: string | null
+  onboarding_completed: boolean
   updated_at: string
 }
 
