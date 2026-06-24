@@ -7,7 +7,20 @@ export interface ProfileResponse {
   cv_uploaded_at: string | null
   telegram_chat_id: string | null
   onboarding_completed: boolean
+  search_location: string | null
+  work_mode: string
+  target_roles: string[]
+  target_levels: string[]
+  query_mode: string
   updated_at: string
+}
+
+export interface SearchPreferencesUpdate {
+  search_location: string | null
+  work_mode: string
+  target_roles: string[]
+  target_levels: string[]
+  query_mode: string
 }
 
 export interface ProfileBasicUpdate {

@@ -15,6 +15,87 @@ const INPUT_CLASS =
   "w-full bg-white/[0.04] border border-white/[0.1] rounded-xl px-4 py-2.5 text-white text-sm " +
   "placeholder:text-gray-600 focus:outline-none focus:border-blue-500/50 transition-colors"
 
+const WORK_MODES = [
+  { value: "any", label: "Farketmez" },
+  { value: "remote", label: "Uzaktan" },
+  { value: "hybrid", label: "Hibrit" },
+  { value: "onsite", label: "Ofiste" },
+]
+
+const LEVEL_PRESETS = ["Intern", "Entry Level", "Junior", "New Grad", "Mid-Level", "Senior"]
+
+const QUERY_MODES = [
+  { value: "manual", label: "Manuel", desc: "Sadece girdiğin tercihlerden" },
+  { value: "ai", label: "Yapay zeka", desc: "CV + becerilerinden (LLM)" },
+  { value: "hybrid", label: "İkisi birden", desc: "Tercihler + yapay zeka" },
+]
+
+function toggleClass(active: boolean): string {
+  return `px-3 py-1.5 rounded-lg border text-sm transition-colors cursor-pointer ${
+    active
+      ? "bg-blue-500/15 border-blue-500/40 text-blue-300"
+      : "bg-white/[0.04] border-white/[0.1] text-gray-400 hover:text-white"
+  }`
+}
+
+// Ortak chip input — beceriler ve hedef roller paylaşır (DRY).
+function ChipInput({
+  items,
+  onChange,
+  placeholder,
+}: {
+  items: string[]
+  onChange: (items: string[]) => void
+  placeholder?: string
+}) {
+  const [input, setInput] = useState("")
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  function add(raw: string) {
+    const trimmed = raw.trim()
+    if (trimmed && !items.some((i) => i.toLowerCase() === trimmed.toLowerCase())) {
+      onChange([...items, trimmed])
+    }
+    setInput("")
+  }
+
+  function remove(item: string) {
+    onChange(items.filter((i) => i !== item))
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      add(input)
+    }
+    if (e.key === "Backspace" && input === "" && items.length > 0) {
+      remove(items[items.length - 1])
+    }
+  }
+
+  return (
+    <div
+      onClick={() => inputRef.current?.focus()}
+      className="flex flex-wrap items-center gap-1.5 bg-white/[0.04] border border-white/[0.1] rounded-xl px-3 py-2.5 cursor-text"
+    >
+      {items.map((item) => (
+        <span key={item} className="flex items-center gap-1.5 bg-blue-500/15 border border-blue-500/30 text-blue-300 text-xs px-2.5 py-1 rounded-full">
+          {item}
+          <button type="button" onClick={() => remove(item)} aria-label={`${item} kaldır`} className="text-blue-400/60 hover:text-blue-200 transition-colors leading-none cursor-pointer">×</button>
+        </span>
+      ))}
+      <input
+        ref={inputRef}
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder={items.length === 0 ? placeholder : ""}
+        className="flex-1 min-w-[120px] bg-transparent text-white text-sm placeholder:text-gray-600 focus:outline-none py-1"
+      />
+    </div>
+  )
+}
+
 export default function ProfilePage() {
   const [profile, setProfile] = useState<ProfileResponse | null>(null)
   const [error, setError] = useState("")
@@ -44,6 +125,7 @@ export default function ProfilePage() {
           <>
             <BasicInfoSection profile={profile} onUpdated={setProfile} />
             <SkillsSection profile={profile} onUpdated={setProfile} />
+            <SearchPreferencesSection profile={profile} onUpdated={setProfile} />
             <CvSection profile={profile} onUpdated={setProfile} />
             <TelegramSection profile={profile} />
           </>
@@ -189,31 +271,9 @@ function SkillsSection({
   onUpdated: (p: ProfileResponse) => void
 }) {
   const [skills, setSkills] = useState<string[]>(profile.skills ?? [])
-  const [input, setInput] = useState("")
-  const inputRef = useRef<HTMLInputElement>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [isSaved, setIsSaved] = useState(false)
   const [error, setError] = useState("")
-
-  function addSkill(raw: string) {
-    const trimmed = raw.trim()
-    if (trimmed && !skills.includes(trimmed)) setSkills([...skills, trimmed])
-    setInput("")
-  }
-
-  function removeSkill(skill: string) {
-    setSkills(skills.filter((s) => s !== skill))
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") {
-      e.preventDefault()
-      addSkill(input)
-    }
-    if (e.key === "Backspace" && input === "" && skills.length > 0) {
-      removeSkill(skills[skills.length - 1])
-    }
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -235,26 +295,125 @@ function SkillsSection({
   return (
     <SectionCard title="Beceriler" description="Aramalarında kullanılacak yeteneklerin.">
       <form onSubmit={handleSubmit}>
-        <div
-          onClick={() => inputRef.current?.focus()}
-          className="flex flex-wrap items-center gap-1.5 bg-white/[0.04] border border-white/[0.1] rounded-xl px-3 py-2.5 cursor-text"
-        >
-          {skills.map((skill) => (
-            <span key={skill} className="flex items-center gap-1.5 bg-blue-500/15 border border-blue-500/30 text-blue-300 text-xs px-2.5 py-1 rounded-full">
-              {skill}
-              <button type="button" onClick={() => removeSkill(skill)} aria-label={`${skill} becerisini kaldır`} className="text-blue-400/60 hover:text-blue-200 transition-colors leading-none cursor-pointer">×</button>
-            </span>
-          ))}
-          <input
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={skills.length === 0 ? "Beceri ekle ve Enter'a bas" : ""}
-            className="flex-1 min-w-[120px] bg-transparent text-white text-sm placeholder:text-gray-600 focus:outline-none py-1"
-          />
-        </div>
+        <ChipInput items={skills} onChange={setSkills} placeholder="Beceri ekle ve Enter'a bas" />
         <p className="text-xs text-gray-600 mt-2">Enter ile ekle · Backspace ile sil</p>
+        <SaveRow isSaving={isSaving} isSaved={isSaved} error={error} />
+      </form>
+    </SectionCard>
+  )
+}
+
+// ── Arama tercihleri ────────────────────────────────────────────
+
+function SearchPreferencesSection({
+  profile,
+  onUpdated,
+}: {
+  profile: ProfileResponse
+  onUpdated: (p: ProfileResponse) => void
+}) {
+  const [location, setLocation] = useState(profile.search_location ?? "")
+  const [workMode, setWorkMode] = useState(profile.work_mode || "any")
+  const [roles, setRoles] = useState<string[]>(profile.target_roles ?? [])
+  const [levels, setLevels] = useState<string[]>(profile.target_levels ?? [])
+  const [queryMode, setQueryMode] = useState(profile.query_mode || "ai")
+  const [isSaving, setIsSaving] = useState(false)
+  const [isSaved, setIsSaved] = useState(false)
+  const [error, setError] = useState("")
+
+  function toggleLevel(level: string) {
+    setLevels((prev) =>
+      prev.includes(level) ? prev.filter((l) => l !== level) : [...prev, level],
+    )
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError("")
+    setIsSaved(false)
+    setIsSaving(true)
+    try {
+      const { data } = await api.put<ProfileResponse>("/profile/me/search-preferences", {
+        search_location: location.trim() || null,
+        work_mode: workMode,
+        target_roles: roles,
+        target_levels: levels,
+        query_mode: queryMode,
+      })
+      onUpdated(data)
+      setIsSaved(true)
+    } catch (err) {
+      setError(extractErrorMessage(err))
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  return (
+    <SectionCard
+      title="Arama Tercihleri"
+      description="Nasıl iş aradığını belirt — bunlardan otomatik arama sorguları kurulur."
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Konum */}
+        <div>
+          <label htmlFor="location" className="block text-xs text-gray-500 mb-1.5">Konum</label>
+          <input id="location" value={location} onChange={(e) => setLocation(e.target.value)} className={INPUT_CLASS} placeholder="İstanbul, Türkiye" />
+        </div>
+
+        {/* Çalışma şekli */}
+        <div>
+          <span className="block text-xs text-gray-500 mb-1.5">Çalışma şekli</span>
+          <div className="flex flex-wrap gap-2">
+            {WORK_MODES.map((mode) => (
+              <button key={mode.value} type="button" onClick={() => setWorkMode(mode.value)} className={toggleClass(workMode === mode.value)}>
+                {mode.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Hedef roller */}
+        <div>
+          <span className="block text-xs text-gray-500 mb-1.5">Hedef roller</span>
+          <ChipInput items={roles} onChange={setRoles} placeholder="Rol ekle (örn. Machine Learning Engineer)" />
+          <p className="text-xs text-gray-600 mt-2">Enter ile ekle · Backspace ile sil</p>
+        </div>
+
+        {/* Seviye */}
+        <div>
+          <span className="block text-xs text-gray-500 mb-1.5">Seviye</span>
+          <div className="flex flex-wrap gap-2">
+            {LEVEL_PRESETS.map((level) => (
+              <button key={level} type="button" onClick={() => toggleLevel(level)} className={toggleClass(levels.includes(level))}>
+                {level}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Sorgu üretim modu */}
+        <div>
+          <span className="block text-xs text-gray-500 mb-2">Sorgu üretimi</span>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            {QUERY_MODES.map((mode) => (
+              <button
+                key={mode.value}
+                type="button"
+                onClick={() => setQueryMode(mode.value)}
+                className={`text-left p-3 rounded-xl border transition-colors cursor-pointer ${
+                  queryMode === mode.value
+                    ? "border-blue-500/50 bg-blue-500/10"
+                    : "border-white/[0.1] bg-white/[0.03] hover:border-white/20"
+                }`}
+              >
+                <div className="text-sm text-white font-medium">{mode.label}</div>
+                <div className="text-xs text-gray-500 mt-0.5">{mode.desc}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
         <SaveRow isSaving={isSaving} isSaved={isSaved} error={error} />
       </form>
     </SectionCard>
