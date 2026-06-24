@@ -44,7 +44,12 @@ api.interceptors.response.use(
       clearToken()
       // Sadece korumalı sayfalardayken yönlendir
       const path = window.location.pathname
-      const isProtected = path.startsWith("/dashboard") || path.startsWith("/onboarding") || path.startsWith("/admin")
+      const isProtected =
+        path.startsWith("/dashboard") ||
+        path.startsWith("/onboarding") ||
+        path.startsWith("/admin") ||
+        path.startsWith("/profile") ||
+        path.startsWith("/settings")
       if (isProtected) {
         window.location.href = "/login"
       }

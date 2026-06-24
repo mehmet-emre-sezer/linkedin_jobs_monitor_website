@@ -6,6 +6,7 @@ import DashboardNav from "@/components/dashboard/DashboardNav"
 import { api, extractErrorMessage } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import type { ProfileResponse } from "@/lib/profile-types"
+import RequireAuth from "@/components/auth/RequireAuth"
 
 function formatDate(iso: string): string {
   const [year, month, day] = iso.slice(0, 10).split("-")
@@ -13,6 +14,14 @@ function formatDate(iso: string): string {
 }
 
 export default function SettingsPage() {
+  return (
+    <RequireAuth>
+      <SettingsPageContent />
+    </RequireAuth>
+  )
+}
+
+function SettingsPageContent() {
   const router = useRouter()
   const { user, logout } = useAuth()
   const [isTelegramConnected, setIsTelegramConnected] = useState(false)

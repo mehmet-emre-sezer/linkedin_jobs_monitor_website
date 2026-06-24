@@ -9,6 +9,7 @@ import {
   GRADUATION_YEAR_MAX,
 } from "@/constants/app"
 import type { ProfileResponse } from "@/lib/profile-types"
+import RequireAuth from "@/components/auth/RequireAuth"
 
 // Bölümler arası ortak input stili (tema ile tutarlı, focus ring'li).
 const INPUT_CLASS =
@@ -97,6 +98,14 @@ function ChipInput({
 }
 
 export default function ProfilePage() {
+  return (
+    <RequireAuth>
+      <ProfilePageContent />
+    </RequireAuth>
+  )
+}
+
+function ProfilePageContent() {
   const [profile, setProfile] = useState<ProfileResponse | null>(null)
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(true)
