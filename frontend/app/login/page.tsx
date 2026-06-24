@@ -32,7 +32,15 @@ export default function LoginPage() {
     try {
       const { data } = await api.post<TokenResponse>("/auth/login", { email, password })
       login(data)
-      // Onboarding'i bitiren dashboard'a, bitirmeyen onboarding'e gider.
+
+      // Admin → direkt panel (onboarding akışına girmez).
+      // is_admin backend'den geliyor; gerçek güvenlik require_admin + AdminGuard'da.
+      if (data.user.is_admin) {
+        router.push("/admin")
+        return
+      }
+
+      // Normal kullanıcı: onboarding'i bitiren dashboard'a, bitirmeyen onboarding'e gider.
       // (Email doğrulamasıyla karıştırma — ikisi farklı şey.)
       const { data: profile } = await api.get<ProfileResponse>("/profile/me")
       router.push(profile.onboarding_completed ? "/dashboard" : "/onboarding")
