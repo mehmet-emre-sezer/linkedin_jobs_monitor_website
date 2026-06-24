@@ -11,6 +11,8 @@ MAX_ROLES = 20
 MAX_ROLE_LENGTH = 100
 MAX_LEVELS = 10
 MAX_LEVEL_LENGTH = 50
+MAX_LOCATIONS = 10
+MAX_LOCATION_LENGTH = 120
 
 
 def _normalize_str_list(raw: list[str], *, max_item_length: int) -> list[str]:
@@ -63,19 +65,16 @@ class SkillsUpdate(BaseModel):
 
 class SearchPreferencesUpdate(BaseModel):
     """Kullanıcının arama tercihleri. Kaydedince aktif SearchQuery'ler yeniden kurulur."""
-    search_location: str | None = Field(default=None, max_length=255)
+    search_locations: list[str] = Field(default_factory=list, max_length=MAX_LOCATIONS)
     work_mode: Literal["any", "remote", "hybrid", "onsite"] = "any"
     target_roles: list[str] = Field(default_factory=list, max_length=MAX_ROLES)
     target_levels: list[str] = Field(default_factory=list, max_length=MAX_LEVELS)
     query_mode: Literal["manual", "ai", "hybrid"] = "ai"
 
-    @field_validator("search_location")
+    @field_validator("search_locations")
     @classmethod
-    def strip_location(cls, raw: str | None) -> str | None:
-        if raw is None:
-            return None
-        cleaned = raw.strip()
-        return cleaned or None
+    def normalize_locations(cls, raw: list[str]) -> list[str]:
+        return _normalize_str_list(raw, max_item_length=MAX_LOCATION_LENGTH)
 
     @field_validator("target_roles")
     @classmethod
@@ -98,7 +97,7 @@ class ProfileResponse(BaseModel):
     cv_uploaded_at: datetime | None
     telegram_chat_id: str | None
     onboarding_completed: bool
-    search_location: str | None
+    search_locations: list[str]
     work_mode: str
     target_roles: list[str]
     target_levels: list[str]

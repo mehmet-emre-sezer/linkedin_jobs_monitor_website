@@ -42,7 +42,10 @@ class Profile(Base):
 
     # ── Arama tercihleri ──────────────────────────────────────────
     # Kullanıcı bunları kaydedince aktif SearchQuery'ler yeniden kurulur.
-    search_location: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # Çoklu şehir: scraper her şehir için ayrı arama yapar (fan-out).
+    search_locations: Mapped[list[str]] = mapped_column(
+        JSON, nullable=False, default=list, server_default="[]"
+    )
     # "any" | "remote" | "hybrid" | "onsite"
     work_mode: Mapped[str] = mapped_column(
         String(16), nullable=False, default="any", server_default="any"

@@ -312,7 +312,7 @@ function SearchPreferencesSection({
   profile: ProfileResponse
   onUpdated: (p: ProfileResponse) => void
 }) {
-  const [location, setLocation] = useState(profile.search_location ?? "")
+  const [locations, setLocations] = useState<string[]>(profile.search_locations ?? [])
   const [workMode, setWorkMode] = useState(profile.work_mode || "any")
   const [roles, setRoles] = useState<string[]>(profile.target_roles ?? [])
   const [levels, setLevels] = useState<string[]>(profile.target_levels ?? [])
@@ -334,7 +334,7 @@ function SearchPreferencesSection({
     setIsSaving(true)
     try {
       const { data } = await api.put<ProfileResponse>("/profile/me/search-preferences", {
-        search_location: location.trim() || null,
+        search_locations: locations,
         work_mode: workMode,
         target_roles: roles,
         target_levels: levels,
@@ -355,10 +355,11 @@ function SearchPreferencesSection({
       description="Nasıl iş aradığını belirt — bunlardan otomatik arama sorguları kurulur."
     >
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Konum */}
+        {/* Konum (çoklu şehir — her biri ayrı aranır) */}
         <div>
-          <label htmlFor="location" className="block text-xs text-gray-500 mb-1.5">Konum</label>
-          <input id="location" value={location} onChange={(e) => setLocation(e.target.value)} className={INPUT_CLASS} placeholder="İstanbul, Türkiye" />
+          <span className="block text-xs text-gray-500 mb-1.5">Konum</span>
+          <ChipInput items={locations} onChange={setLocations} placeholder="Şehir ekle (örn. İstanbul)" />
+          <p className="text-xs text-gray-600 mt-2">Her şehir ayrı aranır · Enter ile ekle</p>
         </div>
 
         {/* Çalışma şekli */}

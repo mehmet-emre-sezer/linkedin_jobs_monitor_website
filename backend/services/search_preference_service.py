@@ -24,7 +24,7 @@ def update_search_preferences(
 ) -> Profile:
     """Tercihleri kaydet, sonra moda göre aktif sorguları yeniden kur."""
     profile = get_or_create_profile(db, user_id)
-    profile.search_location = data.search_location
+    profile.search_locations = data.search_locations
     profile.work_mode = data.work_mode
     profile.target_roles = data.target_roles
     profile.target_levels = data.target_levels

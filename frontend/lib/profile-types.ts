@@ -7,7 +7,7 @@ export interface ProfileResponse {
   cv_uploaded_at: string | null
   telegram_chat_id: string | null
   onboarding_completed: boolean
-  search_location: string | null
+  search_locations: string[]
   work_mode: string
   target_roles: string[]
   target_levels: string[]
@@ -16,7 +16,7 @@ export interface ProfileResponse {
 }
 
 export interface SearchPreferencesUpdate {
-  search_location: string | null
+  search_locations: string[]
   work_mode: string
   target_roles: string[]
   target_levels: string[]
