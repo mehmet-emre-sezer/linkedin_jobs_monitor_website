@@ -1,9 +1,34 @@
 from datetime import datetime
+from typing import Literal
+
 from pydantic import BaseModel, Field, field_validator
 
 
 MAX_SKILLS = 50
 MAX_SKILL_LENGTH = 50
+
+MAX_ROLES = 20
+MAX_ROLE_LENGTH = 100
+MAX_LEVELS = 10
+MAX_LEVEL_LENGTH = 50
+
+
+def _normalize_str_list(raw: list[str], *, max_item_length: int) -> list[str]:
+    """strip + boş atla + case-insensitive dedupe + uzunluk kontrolü."""
+    cleaned: list[str] = []
+    seen: set[str] = set()
+    for item in raw:
+        value = item.strip()
+        if not value:
+            continue
+        if len(value) > max_item_length:
+            raise ValueError(f"En fazla {max_item_length} karakter olabilir: {value[:30]}…")
+        key = value.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        cleaned.append(value)
+    return cleaned
 
 
 class ProfileBasicUpdate(BaseModel):
@@ -36,6 +61,33 @@ class SkillsUpdate(BaseModel):
         return cleaned
 
 
+class SearchPreferencesUpdate(BaseModel):
+    """Kullanıcının arama tercihleri. Kaydedince aktif SearchQuery'ler yeniden kurulur."""
+    search_location: str | None = Field(default=None, max_length=255)
+    work_mode: Literal["any", "remote", "hybrid", "onsite"] = "any"
+    target_roles: list[str] = Field(default_factory=list, max_length=MAX_ROLES)
+    target_levels: list[str] = Field(default_factory=list, max_length=MAX_LEVELS)
+    query_mode: Literal["manual", "ai", "hybrid"] = "ai"
+
+    @field_validator("search_location")
+    @classmethod
+    def strip_location(cls, raw: str | None) -> str | None:
+        if raw is None:
+            return None
+        cleaned = raw.strip()
+        return cleaned or None
+
+    @field_validator("target_roles")
+    @classmethod
+    def normalize_roles(cls, raw: list[str]) -> list[str]:
+        return _normalize_str_list(raw, max_item_length=MAX_ROLE_LENGTH)
+
+    @field_validator("target_levels")
+    @classmethod
+    def normalize_levels(cls, raw: list[str]) -> list[str]:
+        return _normalize_str_list(raw, max_item_length=MAX_LEVEL_LENGTH)
+
+
 class ProfileResponse(BaseModel):
     """Frontend'e dönen profil."""
     name: str | None
@@ -46,6 +98,11 @@ class ProfileResponse(BaseModel):
     cv_uploaded_at: datetime | None
     telegram_chat_id: str | None
     onboarding_completed: bool
+    search_location: str | None
+    work_mode: str
+    target_roles: list[str]
+    target_levels: list[str]
+    query_mode: str
     updated_at: datetime
 
     class Config:

@@ -40,6 +40,24 @@ class Profile(Base):
         Boolean, nullable=False, default=False, server_default="false"
     )
 
+    # ── Arama tercihleri ──────────────────────────────────────────
+    # Kullanıcı bunları kaydedince aktif SearchQuery'ler yeniden kurulur.
+    search_location: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # "any" | "remote" | "hybrid" | "onsite"
+    work_mode: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="any", server_default="any"
+    )
+    target_roles: Mapped[list[str]] = mapped_column(
+        JSON, nullable=False, default=list, server_default="[]"
+    )
+    target_levels: Mapped[list[str]] = mapped_column(
+        JSON, nullable=False, default=list, server_default="[]"
+    )
+    # Query üretim modu: "manual" (tercihlerden) | "ai" (LLM) | "hybrid" (ikisi)
+    query_mode: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="ai", server_default="ai"
+    )
+
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), onupdate=func.now()

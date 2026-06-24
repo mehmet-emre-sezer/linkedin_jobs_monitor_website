@@ -5,8 +5,13 @@ from core.auth import get_current_user
 from core.database import get_db
 from core.exceptions import FileTooLargeError, InvalidFileTypeError
 from models.user import User
-from schemas.profile import ProfileBasicUpdate, ProfileResponse, SkillsUpdate
-from services import profile_service
+from schemas.profile import (
+    ProfileBasicUpdate,
+    ProfileResponse,
+    SearchPreferencesUpdate,
+    SkillsUpdate,
+)
+from services import profile_service, search_preference_service
 
 router = APIRouter(prefix="/profile", tags=["profile"])
 
@@ -41,6 +46,16 @@ def update_skills(
     """Onboarding adım 2: becerileri kaydet."""
     profile = profile_service.set_skills(db, current_user.id, data)
     return profile
+
+
+@router.put("/me/search-preferences", response_model=ProfileResponse)
+def update_search_preferences(
+    data: SearchPreferencesUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> ProfileResponse:
+    """Arama tercihlerini kaydet + moda göre aktif sorguları yeniden kur."""
+    return search_preference_service.update_search_preferences(db, current_user.id, data)
 
 
 @router.post("/me/complete-onboarding", response_model=ProfileResponse)
