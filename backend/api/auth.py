@@ -69,6 +69,15 @@ def me(current_user: User = Depends(get_current_user)) -> UserResponse:
     return current_user
 
 
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_me(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> None:
+    """Giriş yapmış kullanıcının hesabını ve tüm verisini kalıcı olarak sil."""
+    auth_service.delete_account(db, current_user.id)
+
+
 @router.post("/verify-email", response_model=UserResponse)
 def verify_email(data: VerifyEmailRequest, db: Session = Depends(get_db)) -> UserResponse:
     """Email doğrulama token'ını kullanarak hesabı aktifleştir."""

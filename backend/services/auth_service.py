@@ -133,3 +133,16 @@ def reset_password(db: Session, token: str, new_password: str) -> User:
     db.commit()
     db.refresh(user)
     return user
+
+
+def delete_account(db: Session, user_id: int) -> None:
+    """Kullanıcıyı ve ilişkili tüm verisini sil.
+
+    Profile / jobs / scan_runs / search_queries FK'leri CASCADE olduğu için
+    onlar da silinir; error_logs.user_id ise SET NULL olur.
+    """
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise UserNotFoundError()
+    db.delete(user)
+    db.commit()
