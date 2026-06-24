@@ -281,7 +281,9 @@ function CvSection({
     try {
       const form = new FormData()
       form.append("file", file)
-      const { data } = await api.post<ProfileResponse>("/profile/me/cv", form)
+      const { data } = await api.post<ProfileResponse>("/profile/me/cv", form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
       onUpdated(data)
       setIsSaved(true)
     } catch (err) {
