@@ -79,9 +79,14 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[#0f1117] text-gray-300">
       <nav className="flex items-center justify-between px-6 py-4 max-w-5xl mx-auto">
         <span className="font-bold text-lg text-white tracking-tight">{APP_NAME}</span>
-        <Link href="/register" className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition-colors">
-          Ücretsiz Başla
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/login" className="text-sm text-gray-300 hover:text-white px-4 py-2 rounded-lg transition-colors">
+            Giriş yap
+          </Link>
+          <Link href="/register" className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition-colors">
+            Ücretsiz Başla
+          </Link>
+        </div>
       </nav>
 
       <main className="max-w-5xl mx-auto px-6">
