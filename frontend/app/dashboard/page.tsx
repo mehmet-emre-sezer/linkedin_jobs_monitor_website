@@ -14,6 +14,7 @@ import StatusBanner from "@/components/dashboard/StatusBanner"
 import StatCards from "@/components/dashboard/StatCards"
 import RecentJobs from "@/components/dashboard/RecentJobs"
 import QueryStats from "@/components/dashboard/QueryStats"
+import RequireAuth from "@/components/auth/RequireAuth"
 
 // ── Backend snake_case → component camelCase ────────────────────
 
@@ -43,6 +44,14 @@ function adaptQueryStat(b: BackendQueryStat): QueryStat {
 // ── Sayfa ───────────────────────────────────────────────────────
 
 export default function DashboardPage() {
+  return (
+    <RequireAuth>
+      <DashboardPageContent />
+    </RequireAuth>
+  )
+}
+
+function DashboardPageContent() {
   const { user } = useAuth()
   const [summary, setSummary] = useState<BackendDashboardSummary | null>(null)
   const [jobs, setJobs] = useState<Job[]>([])

@@ -9,6 +9,7 @@ import { api, extractErrorMessage } from "@/lib/api"
 import type { ProfileResponse } from "@/lib/profile-types"
 import CvUploadZone from "@/components/onboarding/CvUploadZone"
 import CvParsePreview from "@/components/onboarding/CvParsePreview"
+import RequireAuth from "@/components/auth/RequireAuth"
 
 const TOTAL_STEPS = 4
 
@@ -341,6 +342,14 @@ function Step4({ isLinked, onLinked, onError }: Step4Props) {
 // ── ANA SAYFA ────────────────────────────────────────────────────
 
 export default function OnboardingPage() {
+  return (
+    <RequireAuth>
+      <OnboardingPageContent />
+    </RequireAuth>
+  )
+}
+
+function OnboardingPageContent() {
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [isInitializing, setIsInitializing] = useState(true)

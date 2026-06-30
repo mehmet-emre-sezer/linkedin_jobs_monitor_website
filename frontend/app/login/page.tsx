@@ -40,8 +40,13 @@ export default function LoginPage() {
         return
       }
 
+      // Sert kapı: e-posta doğrulanmamışsa doğrulama ekranına gönder.
+      if (!data.user.is_email_verified) {
+        router.push("/verify-email")
+        return
+      }
+
       // Normal kullanıcı: onboarding'i bitiren dashboard'a, bitirmeyen onboarding'e gider.
-      // (Email doğrulamasıyla karıştırma — ikisi farklı şey.)
       const { data: profile } = await api.get<ProfileResponse>("/profile/me")
       router.push(profile.onboarding_completed ? "/dashboard" : "/onboarding")
     } catch (err) {
