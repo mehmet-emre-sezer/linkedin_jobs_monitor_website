@@ -51,13 +51,13 @@ def scan_user(self, user_id: int) -> dict:
 
     try:
         profile = db.query(Profile).filter(Profile.user_id == user_id).first()
-        if profile is None or not (profile.cv_text and profile.cv_text.strip()):
+        if profile is None:
             _finish_run(db, run, status="failed")
             error_log_service.log_error(
                 db,
                 severity="warning",
                 source="scraper",
-                message="Tarama atlandı: profil veya CV bilgisi yok",
+                message="Tarama atlandı: profil yok",
                 user_id=user_id,
             )
             return {"user_id": user_id, "status": "skipped", "reason": "no_profile"}
@@ -150,6 +150,19 @@ def _load_active_queries(db: Session, user_id: int) -> list[str]:
     return [row.query_text for row in rows]
 
 
+def _build_candidate_profile(profile: Profile) -> str:
+    """Scoring/match reasoning için aday profili: manuel beceriler + CV metni.
+
+    CV opsiyonel — yoksa sadece becerilerle değerlendirilir.
+    """
+    parts: list[str] = []
+    if profile.skills:
+        parts.append("Beceriler: " + ", ".join(profile.skills))
+    if profile.cv_text and profile.cv_text.strip():
+        parts.append("CV:\n" + profile.cv_text.strip())
+    return "\n\n".join(parts)
+
+
 def _dedupe_by_id(jobs: list[dict]) -> list[dict]:
     """Aynı linkedin_id birden fazla query'ye düşmüş olabilir; ilki tut."""
     seen_ids: set[str] = set()
@@ -185,9 +198,10 @@ def _process_jobs(
 ) -> int:
     """LLM ile puanla, Job kaydını yaz, threshold üstüne bildirim gönder."""
     sent_count = 0
+    candidate_profile = _build_candidate_profile(profile)
 
     for job in new_jobs:
-        scoring = score_job(job, candidate_profile=profile.cv_text or "")
+        scoring = score_job(job, candidate_profile=candidate_profile)
         if scoring is None:
             # LLM hatası — bir sonraki taramada tekrar denensin
             logger.warning("Scoring başarısız, atlanıyor: %s", job.get("title", "?"))

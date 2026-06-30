@@ -25,12 +25,6 @@ const WORK_MODES = [
 
 const LEVEL_PRESETS = ["Intern", "Entry Level", "Junior", "New Grad", "Mid-Level", "Senior"]
 
-const QUERY_MODES = [
-  { value: "manual", label: "Manuel", desc: "Sadece girdiğin tercihlerden" },
-  { value: "ai", label: "Yapay zeka", desc: "CV + becerilerinden (LLM)" },
-  { value: "hybrid", label: "İkisi birden", desc: "Tercihler + yapay zeka" },
-]
-
 function toggleClass(active: boolean): string {
   return `px-3 py-1.5 rounded-lg border text-sm transition-colors cursor-pointer ${
     active
@@ -325,7 +319,6 @@ function SearchPreferencesSection({
   const [workMode, setWorkMode] = useState(profile.work_mode || "any")
   const [roles, setRoles] = useState<string[]>(profile.target_roles ?? [])
   const [levels, setLevels] = useState<string[]>(profile.target_levels ?? [])
-  const [queryMode, setQueryMode] = useState(profile.query_mode || "ai")
   const [isSaving, setIsSaving] = useState(false)
   const [isSaved, setIsSaved] = useState(false)
   const [error, setError] = useState("")
@@ -347,7 +340,6 @@ function SearchPreferencesSection({
         work_mode: workMode,
         target_roles: roles,
         target_levels: levels,
-        query_mode: queryMode,
       })
       onUpdated(data)
       setIsSaved(true)
@@ -397,28 +389,6 @@ function SearchPreferencesSection({
             {LEVEL_PRESETS.map((level) => (
               <button key={level} type="button" onClick={() => toggleLevel(level)} className={toggleClass(levels.includes(level))}>
                 {level}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Sorgu üretim modu */}
-        <div>
-          <span className="block text-xs text-gray-500 mb-2">Sorgu üretimi</span>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            {QUERY_MODES.map((mode) => (
-              <button
-                key={mode.value}
-                type="button"
-                onClick={() => setQueryMode(mode.value)}
-                className={`text-left p-3 rounded-xl border transition-colors cursor-pointer ${
-                  queryMode === mode.value
-                    ? "border-blue-500/50 bg-blue-500/10"
-                    : "border-white/[0.1] bg-white/[0.03] hover:border-white/20"
-                }`}
-              >
-                <div className="text-sm text-white font-medium">{mode.label}</div>
-                <div className="text-xs text-gray-500 mt-0.5">{mode.desc}</div>
               </button>
             ))}
           </div>

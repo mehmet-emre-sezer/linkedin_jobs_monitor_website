@@ -12,7 +12,6 @@ from core.security import (
     decode_purpose_token,
 )
 from models.profile import Profile
-from models.search_query import SearchQuery
 from schemas.profile import ProfileBasicUpdate, SkillsUpdate
 from services import cv_service, telegram_bot
 
@@ -117,28 +116,10 @@ async def upload_and_parse_cv(db: Session, user_id: int, file: UploadFile) -> Pr
             existing_lower.add(skill.lower())
     profile.skills = merged
 
-    # LLM'in ürettiği sorguları kaydet — kullanıcının mevcut aktif sorgusu yoksa
-    if parsed.queries:
-        _seed_initial_queries(db, user_id=user_id, queries=parsed.queries)
+    # Not: CV artık arama sorgusu ÜRETMEZ. Sorgular kullanıcının arama
+    # tercihlerinden kurulur (search_preference_service); CV yalnızca profil
+    # doldurma + scoring/match reasoning için kullanılır.
 
     db.commit()
     db.refresh(profile)
     return profile
-
-
-def _seed_initial_queries(db: Session, *, user_id: int, queries: list[str]) -> None:
-    """İlk CV yüklemesinde, kullanıcının henüz aktif sorgusu yoksa otomatik ekle.
-
-    Optimizer (Faz 6G/6H) sorguları sonradan rafine eder; biz sadece başlangıcı veriyoruz.
-    Kullanıcı zaten manuel sorgu eklemişse ona dokunmuyoruz.
-    """
-    has_active = (
-        db.query(SearchQuery)
-        .filter(SearchQuery.user_id == user_id, SearchQuery.is_active.is_(True))
-        .first()
-    )
-    if has_active:
-        return
-
-    for query_text in queries:
-        db.add(SearchQuery(user_id=user_id, query_text=query_text, is_active=True))

@@ -69,7 +69,6 @@ class SearchPreferencesUpdate(BaseModel):
     work_mode: Literal["any", "remote", "hybrid", "onsite"] = "any"
     target_roles: list[str] = Field(default_factory=list, max_length=MAX_ROLES)
     target_levels: list[str] = Field(default_factory=list, max_length=MAX_LEVELS)
-    query_mode: Literal["manual", "ai", "hybrid"] = "ai"
 
     @field_validator("search_locations")
     @classmethod
@@ -101,7 +100,6 @@ class ProfileResponse(BaseModel):
     work_mode: str
     target_roles: list[str]
     target_levels: list[str]
-    query_mode: str
     updated_at: datetime
 
     class Config:

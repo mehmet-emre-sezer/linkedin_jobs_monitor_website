@@ -11,7 +11,6 @@ export interface ProfileResponse {
   work_mode: string
   target_roles: string[]
   target_levels: string[]
-  query_mode: string
   updated_at: string
 }
 
@@ -20,7 +19,6 @@ export interface SearchPreferencesUpdate {
   work_mode: string
   target_roles: string[]
   target_levels: string[]
-  query_mode: string
 }
 
 export interface ProfileBasicUpdate {

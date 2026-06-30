@@ -56,10 +56,6 @@ class Profile(Base):
     target_levels: Mapped[list[str]] = mapped_column(
         JSON, nullable=False, default=list, server_default="[]"
     )
-    # Query üretim modu: "manual" (tercihlerden) | "ai" (LLM) | "hybrid" (ikisi)
-    query_mode: Mapped[str] = mapped_column(
-        String(16), nullable=False, default="ai", server_default="ai"
-    )
 
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
