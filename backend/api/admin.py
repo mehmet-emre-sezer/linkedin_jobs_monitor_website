@@ -8,6 +8,7 @@ from models.user import User
 from schemas.admin import AdminOverview, AdminUserDetail, AdminUserItem, FunnelStep
 from schemas.error_log import ErrorLogResponse
 from services import admin_service, error_log_service
+from tasks.scan_user import scan_user
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -57,6 +58,22 @@ def get_user_detail(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Kullanıcı bulunamadı.",
         )
+
+
+@router.post("/scan/{user_id}", status_code=status.HTTP_202_ACCEPTED)
+def trigger_scan(
+    user_id: int,
+    _admin: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Bir kullanıcı için taramayı hemen kuyruğa at (Beat'i beklemeden — test/ops)."""
+    if db.query(User.id).filter(User.id == user_id).first() is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Kullanıcı bulunamadı.",
+        )
+    task = scan_user.delay(user_id)
+    return {"user_id": user_id, "task_id": task.id, "status": "enqueued"}
 
 
 @router.get("/errors", response_model=list[ErrorLogResponse])
