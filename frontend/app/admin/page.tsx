@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import AdminStatCards from "@/components/admin/AdminStatCards"
 import FunnelChart from "@/components/admin/FunnelChart"
+import ScanTrigger from "@/components/admin/ScanTrigger"
 import { api, extractErrorMessage } from "@/lib/api"
 import {
   adaptFunnel,
@@ -52,6 +53,8 @@ export default function AdminHomePage() {
           <FunnelChart steps={funnel} />
         </>
       )}
+
+      <ScanTrigger />
     </div>
   )
 }
