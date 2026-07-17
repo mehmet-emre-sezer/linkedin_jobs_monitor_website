@@ -10,6 +10,7 @@ Single-user varsayımı kaldırıldı; `search_location` ve `jobs_per_query` par
 """
 
 import logging
+import re
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -68,12 +69,16 @@ def _scrape_query(
     dismiss_signin_modal(driver)
 
     try:
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "jobs-search__results-list"))
+        # Container değil, kartın kendisini bekle — kartlar (li) JS ile sonradan doluyor.
+        WebDriverWait(driver, 12).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, "ul.jobs-search__results-list li div.base-card")
+            )
         )
     except Exception:
-        logger.warning("Sonuç listesi yüklenemedi: '%s'", query)
+        logger.warning("Sonuç/kart yüklenemedi (0 ilan olabilir): '%s'", query)
         return []
+    delay(1, 2)  # kalan kartların dolmasını bekle
 
     cards = driver.find_elements(
         By.CSS_SELECTOR, "ul.jobs-search__results-list li"
@@ -92,20 +97,40 @@ def _scrape_query(
     return jobs
 
 
-def _extract_job_id(url: str) -> str:
+def _extract_job_id(card, url: str) -> str:
+    """Kararlı sayısal ID: önce URN (urn:li:jobPosting:12345), sonra URL sonundaki sayı."""
     try:
-        return url.split("/view/")[1].split("/")[0].split("?")[0]
-    except IndexError:
-        return url
+        urn = card.find_element(
+            By.CSS_SELECTOR, "[data-entity-urn]"
+        ).get_attribute("data-entity-urn") or ""
+        digits = urn.rsplit(":", 1)[-1]
+        if digits.isdigit():
+            return digits
+    except Exception:
+        pass
+    match = re.search(r"(\d{6,})", url)
+    return match.group(1) if match else ""
 
 
 def _extract_card(driver: webdriver.Chrome, card) -> dict | None:
     try:
-        link_el = card.find_element(By.CSS_SELECTOR, "a.base-card__full-link")
-        title = link_el.get_attribute("aria-label") or link_el.text.strip()
-        link = link_el.get_attribute("href").split("?")[0]
-        job_id = _extract_job_id(link)
+        link = card.find_element(
+            By.CSS_SELECTOR, "a.base-card__full-link"
+        ).get_attribute("href").split("?")[0]
     except Exception:
+        return None
+
+    job_id = _extract_job_id(card, link)
+    if not job_id:
+        return None
+
+    try:
+        title = card.find_element(
+            By.CSS_SELECTOR, "h3.base-search-card__title"
+        ).text.strip()
+    except Exception:
+        title = ""
+    if not title:
         return None
 
     try:
