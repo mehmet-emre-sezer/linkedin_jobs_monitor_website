@@ -48,6 +48,11 @@ class Settings(BaseSettings):
     optimize_every_n_runs: int = 10
     scraper_mode: str = "mock"  # "mock" | "selenium"
 
+    # Selenium için Chrome yolları. Boşsa Selenium Manager otomatik bulur (lokal Mac).
+    # Container'da Dockerfile bunları set eder (chromium + chromedriver).
+    chrome_binary: str = ""
+    chromedriver_path: str = ""
+
     class Config:
         env_file = ".env"
 
