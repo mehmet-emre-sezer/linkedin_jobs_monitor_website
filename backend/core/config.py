@@ -53,6 +53,12 @@ class Settings(BaseSettings):
     chrome_binary: str = ""
     chromedriver_path: str = ""
 
+    # Residential proxy (IPRoyal). proxy_host boşsa proxy kullanılmaz.
+    proxy_host: str = ""
+    proxy_port: str = ""
+    proxy_username: str = ""
+    proxy_password: str = ""
+
     class Config:
         env_file = ".env"
 
