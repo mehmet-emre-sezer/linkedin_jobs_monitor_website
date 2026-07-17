@@ -1,14 +1,11 @@
 """Selenium driver yardımcıları.
 
 Headless Chrome — anti-detection, resim kapalı (GB/hız), opsiyonel residential proxy.
-Proxy user:pass ise auth küçük bir Chrome extension ile sağlanır (Chrome inline
-proxy şifresini desteklemez).
+Proxy user:pass ise auth yerel bir relay ile sağlanır (Chrome inline proxy
+şifresini ve headless'ta auth extension'ını güvenilir desteklemez).
 """
 
-import json
-import os
 import random
-import tempfile
 import time
 
 from selenium import webdriver
@@ -17,39 +14,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 
 from core.config import settings
-
-_proxy_ext_dir: str | None = None
-
-
-def _proxy_auth_extension_dir() -> str:
-    """user:pass proxy auth için tek seferlik unpacked Chrome extension oluştur."""
-    global _proxy_ext_dir
-    if _proxy_ext_dir:
-        return _proxy_ext_dir
-
-    ext_dir = tempfile.mkdtemp(prefix="proxyauth_")
-    manifest = {
-        "version": "1.0.0",
-        "manifest_version": 2,
-        "name": "proxy-auth",
-        "permissions": ["proxy", "tabs", "webRequest", "webRequestBlocking", "<all_urls>"],
-        "background": {"scripts": ["bg.js"]},
-    }
-    background = (
-        "chrome.webRequest.onAuthRequired.addListener("
-        "function(details){return {authCredentials:{username:"
-        + json.dumps(settings.proxy_username)
-        + ",password:"
-        + json.dumps(settings.proxy_password)
-        + '}};},{urls:["<all_urls>"]},["blocking"]);'
-    )
-    with open(os.path.join(ext_dir, "manifest.json"), "w", encoding="utf-8") as f:
-        json.dump(manifest, f)
-    with open(os.path.join(ext_dir, "bg.js"), "w", encoding="utf-8") as f:
-        f.write(background)
-
-    _proxy_ext_dir = ext_dir
-    return ext_dir
+from scraper.proxy_relay import ensure_relay
 
 
 def build_driver() -> webdriver.Chrome:
@@ -75,11 +40,19 @@ def build_driver() -> webdriver.Chrome:
 
     # Residential proxy (IPRoyal). Boşsa direkt bağlanır.
     if settings.proxy_host and settings.proxy_port:
-        options.add_argument(
-            f"--proxy-server=http://{settings.proxy_host}:{settings.proxy_port}"
-        )
         if settings.proxy_username:
-            options.add_argument(f"--load-extension={_proxy_auth_extension_dir()}")
+            # Auth'lu proxy → yerel relay üzerinden (Chrome auth'suz bağlanır)
+            relay_port = ensure_relay(
+                settings.proxy_host,
+                settings.proxy_port,
+                settings.proxy_username,
+                settings.proxy_password,
+            )
+            options.add_argument(f"--proxy-server=http://127.0.0.1:{relay_port}")
+        else:
+            options.add_argument(
+                f"--proxy-server=http://{settings.proxy_host}:{settings.proxy_port}"
+            )
 
     # Container'da Dockerfile chromium yollarını verir; lokalde boş → Selenium Manager
     if settings.chrome_binary:
