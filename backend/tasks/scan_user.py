@@ -74,7 +74,7 @@ def scan_user(self, user_id: int) -> dict:
             )
             return {"user_id": user_id, "status": "skipped", "reason": "no_queries"}
 
-        all_jobs = scrape_jobs(queries)
+        all_jobs = scrape_jobs(queries, profile.search_locations or [])
         unique_jobs = _dedupe_by_id(all_jobs)
         new_jobs = _filter_already_seen(db, user_id, unique_jobs)
 

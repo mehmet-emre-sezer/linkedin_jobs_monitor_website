@@ -25,22 +25,26 @@ logger = logging.getLogger(__name__)
 def scrape_jobs(
     queries: list[str],
     *,
-    search_location: str,
+    search_locations: list[str],
     jobs_per_query: int,
 ) -> list[dict]:
-    """Verilen sorgular için LinkedIn'i tara. Her ilana 'source_query' eklenir."""
+    """Her (konum × sorgu) kombinasyonu için LinkedIn'i tara — tek driver oturumu.
+
+    Aynı ilan birden çok konumda çıkabilir (örn. remote); dedupe caller'da (scan_user).
+    """
     driver = build_driver()
     all_jobs: list[dict] = []
 
     try:
-        for query in queries:
-            logger.info("Searching: '%s...'", query[:80])
-            jobs = _scrape_query(driver, query, search_location, jobs_per_query)
-            logger.info("  → %d jobs found", len(jobs))
-            for job in jobs:
-                job["source_query"] = query
-            all_jobs.extend(jobs)
-            delay(3, 7)
+        for location in search_locations:
+            for query in queries:
+                logger.info("Searching: '%s' @ '%s'", query[:60], location)
+                jobs = _scrape_query(driver, query, location, jobs_per_query)
+                logger.info("  → %d jobs found", len(jobs))
+                for job in jobs:
+                    job["source_query"] = query
+                all_jobs.extend(jobs)
+                delay(3, 7)
     finally:
         driver.quit()
 
