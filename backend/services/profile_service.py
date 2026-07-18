@@ -1,16 +1,11 @@
-from datetime import datetime, timezone
+import secrets
+from datetime import datetime, timedelta, timezone
 
-import jwt
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
 from core.config import settings
-from core.exceptions import InvalidCredentialsError, UserNotFoundError
-from core.security import (
-    TELEGRAM_LINK_PURPOSE,
-    create_purpose_token,
-    decode_purpose_token,
-)
+from core.exceptions import InvalidCredentialsError
 from models.profile import Profile
 from schemas.profile import ProfileBasicUpdate, SkillsUpdate
 from services import cv_service, telegram_bot
@@ -62,28 +57,38 @@ def complete_onboarding(db: Session, user_id: int) -> Profile:
 
 
 def create_telegram_link(db: Session, user_id: int) -> str:
-    """Telegram'a bağlanmak için kısa ömürlü deep link döndür."""
-    get_or_create_profile(db, user_id)  # profil henüz yoksa hazırla
-    token = create_purpose_token(
-        user_id=user_id,
-        purpose=TELEGRAM_LINK_PURPOSE,
-        expire_minutes=settings.telegram_link_expire_minutes,
+    """Telegram'a bağlanmak için kısa ömürlü deep link döndür.
+
+    JWT kullanılamıyor: Telegram'ın `/start` parametresi en fazla 64 karakter
+    ve sadece [A-Za-z0-9_-] kabul ediyor. Bu yüzden kısa opak bir token üretip
+    profile üzerinde saklıyoruz.
+    """
+    profile = get_or_create_profile(db, user_id)
+    profile.telegram_link_token = secrets.token_urlsafe(24)  # ~32 karakter
+    profile.telegram_link_expires_at = datetime.now(timezone.utc) + timedelta(
+        minutes=settings.telegram_link_expire_minutes
     )
-    return telegram_bot.get_deep_link(start_param=token)
+    db.commit()
+    db.refresh(profile)
+    return telegram_bot.get_deep_link(start_param=profile.telegram_link_token)
 
 
 def link_telegram_chat(db: Session, link_token: str, chat_id: str) -> Profile:
     """Bot'tan gelen /start <token> komutuyla chat_id'yi profile'a kaydet."""
-    try:
-        user_id = decode_purpose_token(link_token, TELEGRAM_LINK_PURPOSE)
-    except jwt.PyJWTError as exc:
-        raise InvalidCredentialsError() from exc
-
-    profile = get_profile(db, user_id)
+    profile = (
+        db.query(Profile).filter(Profile.telegram_link_token == link_token).first()
+    )
     if profile is None:
-        raise UserNotFoundError()
+        raise InvalidCredentialsError()
+
+    expires_at = profile.telegram_link_expires_at
+    if expires_at is None or expires_at < datetime.now(timezone.utc):
+        raise InvalidCredentialsError()
 
     profile.telegram_chat_id = str(chat_id)
+    # Token tek kullanımlık — eşleştikten sonra geçersiz kılınır
+    profile.telegram_link_token = None
+    profile.telegram_link_expires_at = None
     db.commit()
     db.refresh(profile)
     return profile

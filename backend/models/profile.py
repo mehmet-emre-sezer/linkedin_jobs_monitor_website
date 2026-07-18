@@ -34,6 +34,15 @@ class Profile(Base):
     # Telegram (ileride dolacak)
     telegram_chat_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
+    # Deep link eşleştirme tokenı. JWT kullanılamaz: Telegram'ın /start
+    # parametresi en fazla 64 karakter ve sadece [A-Za-z0-9_-] kabul ediyor.
+    telegram_link_token: Mapped[str | None] = mapped_column(
+        String(64), nullable=True, unique=True, index=True
+    )
+    telegram_link_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
     # Onboarding'i bitirip bitirmediği — yönlendirme bunun üzerinden yapılır
     # (email doğrulamasıyla karıştırılmamalı; ikisi farklı şey).
     onboarding_completed: Mapped[bool] = mapped_column(
