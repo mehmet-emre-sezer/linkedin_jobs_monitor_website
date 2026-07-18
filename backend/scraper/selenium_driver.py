@@ -62,6 +62,10 @@ def build_driver() -> webdriver.Chrome:
         driver = webdriver.Chrome(service=Service(settings.chromedriver_path), options=options)
     else:
         driver = webdriver.Chrome(options=options)
+    # Residential proxy yavaş olabiliyor; timeout olmazsa tek sayfa task'ı kilitler
+    driver.set_page_load_timeout(45)
+    driver.set_script_timeout(30)
+
     driver.execute_script(
         "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
     )

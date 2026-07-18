@@ -68,7 +68,13 @@ def _scrape_query(
         "&sortBy=DD"
     )
 
-    driver.get(url)
+    try:
+        driver.get(url)
+    except Exception:
+        # Yavaş/asılı proxy bağlantısı — bu sorguyu atla, tarama devam etsin
+        logger.warning("Sayfa yüklenemedi (timeout): '%s'", query[:60])
+        return []
+
     delay(3, 5)
     dismiss_signin_modal(driver)
 
@@ -185,7 +191,12 @@ def _get_description_and_applicants(
     try:
         driver.execute_script("window.open('');")
         driver.switch_to.window(driver.window_handles[-1])
-        driver.get(job_url)
+        try:
+            driver.get(job_url)
+        except Exception:
+            # İlan detayı açılmadı — kart bilgileriyle devam et
+            return "", ""
+
         delay(2, 4)
         dismiss_signin_modal(driver)
 

@@ -31,9 +31,10 @@ celery_app.conf.update(
     result_serializer="json",
     timezone="Europe/Istanbul",
     enable_utc=True,
-    # Bir task'ın maksimum süresi (LinkedIn ban paranoyası: çok uzun sürmesin)
-    task_soft_time_limit=20 * 60,   # 20 dakika soft
-    task_time_limit=25 * 60,        # 25 dakika hard kill
+    # Bir task'ın maksimum süresi. Residential proxy yavaş (~20 sn/ilan), o yüzden
+    # geniş tutuldu; asılı sayfaları driver'daki page load timeout zaten kesiyor.
+    task_soft_time_limit=45 * 60,   # 45 dakika soft
+    task_time_limit=50 * 60,        # 50 dakika hard kill
     # Worker başına aynı anda 1 task — Faz 6 kararı (LinkedIn ban riski)
     worker_concurrency=1,
     worker_prefetch_multiplier=1,   # tek seferde 1 task çek, sırada bekletme
