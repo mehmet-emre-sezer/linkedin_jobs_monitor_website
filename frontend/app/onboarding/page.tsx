@@ -1,7 +1,5 @@
 "use client"
 
-"use client"
-
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { APP_NAME, BOT_URL, GRADUATION_YEAR_MIN, GRADUATION_YEAR_MAX, ONBOARDING_EXAMPLE_SKILLS } from "@/constants/app"
@@ -10,6 +8,7 @@ import type { ProfileResponse } from "@/lib/profile-types"
 import CvUploadZone from "@/components/onboarding/CvUploadZone"
 import CvParsePreview from "@/components/onboarding/CvParsePreview"
 import RequireAuth from "@/components/auth/RequireAuth"
+import TelegramLinkPanel, { useIsMobile } from "@/components/TelegramLinkPanel"
 
 const TOTAL_STEPS = 4
 
@@ -245,6 +244,7 @@ interface Step4Props {
 function Step4({ isLinked, onLinked, onError }: Step4Props) {
   const [botUrl, setBotUrl] = useState<string>("")
   const [isFetchingLink, setIsFetchingLink] = useState(true)
+  const isMobile = useIsMobile()
 
   // Backend'den deep link al
   useEffect(() => {
@@ -296,11 +296,18 @@ function Step4({ isLinked, onLinked, onError }: Step4Props) {
         ) : (
           <>
             <div className="space-y-3 mb-6">
-              {[
-                { num: "1", text: "Aşağıdaki butona tıkla, Telegram açılır." },
-                { num: "2", text: "Açılan sohbette Start düğmesine bas." },
-                { num: "3", text: "Bu sayfa otomatik güncellenecek." },
-              ].map((item) => (
+              {(isMobile
+                ? [
+                    { num: "1", text: "Aşağıdaki butona tıkla, Telegram açılır." },
+                    { num: "2", text: "Açılan sohbette Start düğmesine bas." },
+                    { num: "3", text: "Bu sayfa otomatik güncellenecek." },
+                  ]
+                : [
+                    { num: "1", text: "Telefonunun kamerasıyla aşağıdaki QR kodu okut." },
+                    { num: "2", text: "Açılan sohbette Start düğmesine bas." },
+                    { num: "3", text: "Bu sayfa otomatik güncellenecek." },
+                  ]
+              ).map((item) => (
                 <div key={item.num} className="flex items-start gap-3">
                   <div className="w-5 h-5 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-400 text-xs flex items-center justify-center shrink-0 mt-0.5">
                     {item.num}
@@ -315,7 +322,7 @@ function Step4({ isLinked, onLinked, onError }: Step4Props) {
                 <div className="w-4 h-4 border-2 border-white/60 border-t-transparent rounded-full animate-spin" />
                 Link hazırlanıyor…
               </div>
-            ) : (
+            ) : isMobile ? (
               <a
                 href={botUrl}
                 target="_blank"
@@ -327,6 +334,8 @@ function Step4({ isLinked, onLinked, onError }: Step4Props) {
                   <path d="M6 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-3M10 2h4m0 0v4m0-4L7 9" />
                 </svg>
               </a>
+            ) : (
+              <TelegramLinkPanel url={botUrl} />
             )}
           </>
         )}

@@ -7,6 +7,7 @@ import { api, extractErrorMessage } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import type { ProfileResponse } from "@/lib/profile-types"
 import RequireAuth from "@/components/auth/RequireAuth"
+import TelegramLinkPanel, { useIsMobile } from "@/components/TelegramLinkPanel"
 
 function formatDate(iso: string): string {
   const [year, month, day] = iso.slice(0, 10).split("-")
@@ -140,26 +141,22 @@ function AccountSection({
 function TelegramSection({ isConnected }: { isConnected: boolean }) {
   const [isLinking, setIsLinking] = useState(false)
   const [error, setError] = useState("")
-  const [fallbackUrl, setFallbackUrl] = useState("")
+  const [linkUrl, setLinkUrl] = useState("")
+  const isMobile = useIsMobile()
 
+  // Mobilde Telegram kurulu olduğu için doğrudan açıyoruz. Masaüstünde
+  // uygulama olmayabilir; orada QR + kopyalanabilir link gösteriyoruz.
   async function handleLink() {
     setError("")
-    setFallbackUrl("")
     setIsLinking(true)
-
-    // Sekmeyi tıklama anında aç: await'ten sonra açılan pencereyi tarayıcı
-    // popup sayıp engelliyor. Adresi istek dönünce veriyoruz.
-    const popup = window.open("", "_blank")
-
     try {
       const { data } = await api.post<{ url: string }>("/profile/me/telegram-link")
-      if (popup) {
-        popup.location.href = data.url
+      if (isMobile) {
+        window.location.href = data.url
       } else {
-        setFallbackUrl(data.url) // popup engellendi → elle tıklansın
+        setLinkUrl(data.url)
       }
     } catch (err) {
-      popup?.close()
       setError(extractErrorMessage(err))
     } finally {
       setIsLinking(false)
@@ -180,20 +177,7 @@ function TelegramSection({ isConnected }: { isConnected: boolean }) {
           {isLinking ? "Hazırlanıyor…" : isConnected ? "Yeniden bağla" : "Bağla"}
         </button>
       </div>
-      {fallbackUrl && (
-        <p className="text-xs mt-3 text-gray-400">
-          Sekme açılmadıysa{" "}
-          <a
-            href={fallbackUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-400 underline"
-          >
-            buraya tıkla
-          </a>
-          .
-        </p>
-      )}
+      {linkUrl && <TelegramLinkPanel url={linkUrl} />}
       {error && <p className="text-red-400 text-xs mt-3">{error}</p>}
     </Card>
   )

@@ -10,6 +10,7 @@ import {
 } from "@/constants/app"
 import type { ProfileResponse } from "@/lib/profile-types"
 import RequireAuth from "@/components/auth/RequireAuth"
+import TelegramLinkPanel, { useIsMobile } from "@/components/TelegramLinkPanel"
 
 // Bölümler arası ortak input stili (tema ile tutarlı, focus ring'li).
 const INPUT_CLASS =
@@ -461,21 +462,23 @@ function CvSection({
 function TelegramSection({ profile }: { profile: ProfileResponse }) {
   const [isLinking, setIsLinking] = useState(false)
   const [error, setError] = useState("")
+  const [linkUrl, setLinkUrl] = useState("")
+  const isMobile = useIsMobile()
   const isConnected = Boolean(profile.telegram_chat_id)
 
+  // Mobilde Telegram kurulu olduğu için doğrudan açıyoruz. Masaüstünde
+  // uygulama olmayabilir; orada QR + kopyalanabilir link gösteriyoruz.
   async function handleLink() {
     setError("")
     setIsLinking(true)
-
-    // Sekmeyi tıklama anında aç: await'ten sonra açılan pencere popup sayılıp
-    // engelleniyor. Adresi istek dönünce veriyoruz.
-    const popup = window.open("", "_blank")
-
     try {
       const { data } = await api.post<{ url: string }>("/profile/me/telegram-link")
-      if (popup) popup.location.href = data.url
+      if (isMobile) {
+        window.location.href = data.url
+      } else {
+        setLinkUrl(data.url)
+      }
     } catch (err) {
-      popup?.close()
       setError(extractErrorMessage(err))
     } finally {
       setIsLinking(false)
@@ -496,6 +499,7 @@ function TelegramSection({ profile }: { profile: ProfileResponse }) {
           {isLinking ? "Hazırlanıyor…" : isConnected ? "Yeniden bağla" : "Bağla"}
         </button>
       </div>
+      {linkUrl && <TelegramLinkPanel url={linkUrl} />}
       {error && <p className="text-red-400 text-xs mt-3">{error}</p>}
     </SectionCard>
   )
