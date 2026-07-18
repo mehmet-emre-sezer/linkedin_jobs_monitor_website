@@ -466,10 +466,16 @@ function TelegramSection({ profile }: { profile: ProfileResponse }) {
   async function handleLink() {
     setError("")
     setIsLinking(true)
+
+    // Sekmeyi tıklama anında aç: await'ten sonra açılan pencere popup sayılıp
+    // engelleniyor. Adresi istek dönünce veriyoruz.
+    const popup = window.open("", "_blank")
+
     try {
       const { data } = await api.post<{ url: string }>("/profile/me/telegram-link")
-      window.open(data.url, "_blank", "noopener,noreferrer")
+      if (popup) popup.location.href = data.url
     } catch (err) {
+      popup?.close()
       setError(extractErrorMessage(err))
     } finally {
       setIsLinking(false)

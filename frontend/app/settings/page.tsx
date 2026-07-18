@@ -140,14 +140,26 @@ function AccountSection({
 function TelegramSection({ isConnected }: { isConnected: boolean }) {
   const [isLinking, setIsLinking] = useState(false)
   const [error, setError] = useState("")
+  const [fallbackUrl, setFallbackUrl] = useState("")
 
   async function handleLink() {
     setError("")
+    setFallbackUrl("")
     setIsLinking(true)
+
+    // Sekmeyi tıklama anında aç: await'ten sonra açılan pencereyi tarayıcı
+    // popup sayıp engelliyor. Adresi istek dönünce veriyoruz.
+    const popup = window.open("", "_blank")
+
     try {
       const { data } = await api.post<{ url: string }>("/profile/me/telegram-link")
-      window.open(data.url, "_blank", "noopener,noreferrer")
+      if (popup) {
+        popup.location.href = data.url
+      } else {
+        setFallbackUrl(data.url) // popup engellendi → elle tıklansın
+      }
     } catch (err) {
+      popup?.close()
       setError(extractErrorMessage(err))
     } finally {
       setIsLinking(false)
@@ -168,6 +180,20 @@ function TelegramSection({ isConnected }: { isConnected: boolean }) {
           {isLinking ? "Hazırlanıyor…" : isConnected ? "Yeniden bağla" : "Bağla"}
         </button>
       </div>
+      {fallbackUrl && (
+        <p className="text-xs mt-3 text-gray-400">
+          Sekme açılmadıysa{" "}
+          <a
+            href={fallbackUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400 underline"
+          >
+            buraya tıkla
+          </a>
+          .
+        </p>
+      )}
       {error && <p className="text-red-400 text-xs mt-3">{error}</p>}
     </Card>
   )
