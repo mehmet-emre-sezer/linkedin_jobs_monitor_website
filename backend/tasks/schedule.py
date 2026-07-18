@@ -21,10 +21,13 @@ def enqueue_all_user_scans(self) -> dict:
     logger.info("enqueue_all_user_scans başladı task_id=%s", self.request.id)
     db = SessionLocal()
     try:
+        # Admin hesapları operasyon hesabı — zamanlanmış taramaya girmez.
+        # (/admin "Test et" düğmesi scan_user'ı doğrudan çağırdığı için elle
+        # tetikleme yine çalışır.)
         user_ids = [
             row[0]
             for row in db.query(User.id)
-            .filter(User.is_email_verified.is_(True))
+            .filter(User.is_email_verified.is_(True), User.is_admin.is_(False))
             .order_by(User.id)
             .all()
         ]
