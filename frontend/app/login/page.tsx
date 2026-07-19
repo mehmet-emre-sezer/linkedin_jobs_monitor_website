@@ -130,6 +130,12 @@ export default function LoginPage() {
               Hesabın yok mu?{" "}
               <Link href="/register" className="text-gray-500 hover:text-gray-400 transition-colors">Ücretsiz kayıt ol</Link>
             </p>
+
+            <p className="text-center text-xs text-gray-600 mt-3">
+              <Link href="/gizlilik" className="text-gray-600 hover:text-gray-400 transition-colors">
+                Gizlilik Politikası
+              </Link>
+            </p>
           </div>
         </div>
       </div>

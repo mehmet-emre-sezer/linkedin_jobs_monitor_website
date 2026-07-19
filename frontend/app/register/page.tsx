@@ -180,7 +180,7 @@ export default function RegisterPage() {
 
               <p className="text-center text-xs text-gray-600 mt-6">
                 Devam ederek{" "}
-                <a href="/terms" className="text-gray-500 hover:text-gray-400 transition-colors">Kullanım Koşulları</a>&apos;nı kabul etmiş olursun.
+                <Link href="/gizlilik" className="text-gray-500 hover:text-gray-400 transition-colors">Gizlilik Politikası</Link>&apos;nı kabul etmiş olursun.
               </p>
             </div>
           )}
