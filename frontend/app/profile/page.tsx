@@ -10,87 +10,14 @@ import {
 } from "@/constants/app"
 import type { ProfileResponse } from "@/lib/profile-types"
 import RequireAuth from "@/components/auth/RequireAuth"
+import ChipInput from "@/components/ChipInput"
+import SearchPreferencesFields, { type SearchPreferences } from "@/components/SearchPreferencesFields"
 import TelegramLinkPanel, { useIsMobile } from "@/components/TelegramLinkPanel"
 
 // Bölümler arası ortak input stili (tema ile tutarlı, focus ring'li).
 const INPUT_CLASS =
   "w-full bg-white/[0.04] border border-white/[0.1] rounded-xl px-4 py-2.5 text-white text-sm " +
   "placeholder:text-gray-600 focus:outline-none focus:border-blue-500/50 transition-colors"
-
-const WORK_MODES = [
-  { value: "any", label: "Farketmez" },
-  { value: "remote", label: "Uzaktan" },
-  { value: "hybrid", label: "Hibrit" },
-  { value: "onsite", label: "Ofiste" },
-]
-
-const LEVEL_PRESETS = ["Intern", "Entry Level", "Junior", "New Grad", "Mid-Level", "Senior"]
-
-function toggleClass(active: boolean): string {
-  return `px-3 py-1.5 rounded-lg border text-sm transition-colors cursor-pointer ${
-    active
-      ? "bg-blue-500/15 border-blue-500/40 text-blue-300"
-      : "bg-white/[0.04] border-white/[0.1] text-gray-400 hover:text-white"
-  }`
-}
-
-// Ortak chip input — beceriler ve hedef roller paylaşır (DRY).
-function ChipInput({
-  items,
-  onChange,
-  placeholder,
-}: {
-  items: string[]
-  onChange: (items: string[]) => void
-  placeholder?: string
-}) {
-  const [input, setInput] = useState("")
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  function add(raw: string) {
-    const trimmed = raw.trim()
-    if (trimmed && !items.some((i) => i.toLowerCase() === trimmed.toLowerCase())) {
-      onChange([...items, trimmed])
-    }
-    setInput("")
-  }
-
-  function remove(item: string) {
-    onChange(items.filter((i) => i !== item))
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") {
-      e.preventDefault()
-      add(input)
-    }
-    if (e.key === "Backspace" && input === "" && items.length > 0) {
-      remove(items[items.length - 1])
-    }
-  }
-
-  return (
-    <div
-      onClick={() => inputRef.current?.focus()}
-      className="flex flex-wrap items-center gap-1.5 bg-white/[0.04] border border-white/[0.1] rounded-xl px-3 py-2.5 cursor-text"
-    >
-      {items.map((item) => (
-        <span key={item} className="flex items-center gap-1.5 bg-blue-500/15 border border-blue-500/30 text-blue-300 text-xs px-2.5 py-1 rounded-full">
-          {item}
-          <button type="button" onClick={() => remove(item)} aria-label={`${item} kaldır`} className="text-blue-400/60 hover:text-blue-200 transition-colors leading-none cursor-pointer">×</button>
-        </span>
-      ))}
-      <input
-        ref={inputRef}
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder={items.length === 0 ? placeholder : ""}
-        className="flex-1 min-w-[120px] bg-transparent text-white text-sm placeholder:text-gray-600 focus:outline-none py-1"
-      />
-    </div>
-  )
-}
 
 export default function ProfilePage() {
   return (
@@ -316,19 +243,15 @@ function SearchPreferencesSection({
   profile: ProfileResponse
   onUpdated: (p: ProfileResponse) => void
 }) {
-  const [locations, setLocations] = useState<string[]>(profile.search_locations ?? [])
-  const [workMode, setWorkMode] = useState(profile.work_mode || "any")
-  const [roles, setRoles] = useState<string[]>(profile.target_roles ?? [])
-  const [levels, setLevels] = useState<string[]>(profile.target_levels ?? [])
+  const [prefs, setPrefs] = useState<SearchPreferences>({
+    locations: profile.search_locations ?? [],
+    workMode: profile.work_mode || "any",
+    roles: profile.target_roles ?? [],
+    levels: profile.target_levels ?? [],
+  })
   const [isSaving, setIsSaving] = useState(false)
   const [isSaved, setIsSaved] = useState(false)
   const [error, setError] = useState("")
-
-  function toggleLevel(level: string) {
-    setLevels((prev) =>
-      prev.includes(level) ? prev.filter((l) => l !== level) : [...prev, level],
-    )
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -337,10 +260,10 @@ function SearchPreferencesSection({
     setIsSaving(true)
     try {
       const { data } = await api.put<ProfileResponse>("/profile/me/search-preferences", {
-        search_locations: locations,
-        work_mode: workMode,
-        target_roles: roles,
-        target_levels: levels,
+        search_locations: prefs.locations,
+        work_mode: prefs.workMode,
+        target_roles: prefs.roles,
+        target_levels: prefs.levels,
       })
       onUpdated(data)
       setIsSaved(true)
@@ -356,45 +279,8 @@ function SearchPreferencesSection({
       title="Arama Tercihleri"
       description="Nasıl iş aradığını belirt — bunlardan otomatik arama sorguları kurulur."
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Konum (çoklu şehir — her biri ayrı aranır) */}
-        <div>
-          <span className="block text-xs text-gray-500 mb-1.5">Konum</span>
-          <ChipInput items={locations} onChange={setLocations} placeholder="Şehir ekle (örn. İstanbul)" />
-          <p className="text-xs text-gray-600 mt-2">Her şehir ayrı aranır · Enter ile ekle</p>
-        </div>
-
-        {/* Çalışma şekli */}
-        <div>
-          <span className="block text-xs text-gray-500 mb-1.5">Çalışma şekli</span>
-          <div className="flex flex-wrap gap-2">
-            {WORK_MODES.map((mode) => (
-              <button key={mode.value} type="button" onClick={() => setWorkMode(mode.value)} className={toggleClass(workMode === mode.value)}>
-                {mode.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Hedef roller */}
-        <div>
-          <span className="block text-xs text-gray-500 mb-1.5">Hedef roller</span>
-          <ChipInput items={roles} onChange={setRoles} placeholder="Rol ekle (örn. Machine Learning Engineer)" />
-          <p className="text-xs text-gray-600 mt-2">Enter ile ekle · Backspace ile sil</p>
-        </div>
-
-        {/* Seviye */}
-        <div>
-          <span className="block text-xs text-gray-500 mb-1.5">Seviye</span>
-          <div className="flex flex-wrap gap-2">
-            {LEVEL_PRESETS.map((level) => (
-              <button key={level} type="button" onClick={() => toggleLevel(level)} className={toggleClass(levels.includes(level))}>
-                {level}
-              </button>
-            ))}
-          </div>
-        </div>
-
+      <form onSubmit={handleSubmit}>
+        <SearchPreferencesFields value={prefs} onChange={setPrefs} />
         <SaveRow isSaving={isSaving} isSaved={isSaved} error={error} />
       </form>
     </SectionCard>

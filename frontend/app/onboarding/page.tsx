@@ -8,9 +8,10 @@ import type { ProfileResponse } from "@/lib/profile-types"
 import CvUploadZone from "@/components/onboarding/CvUploadZone"
 import CvParsePreview from "@/components/onboarding/CvParsePreview"
 import RequireAuth from "@/components/auth/RequireAuth"
+import SearchPreferencesFields, { type SearchPreferences } from "@/components/SearchPreferencesFields"
 import TelegramLinkPanel, { useIsMobile } from "@/components/TelegramLinkPanel"
 
-const TOTAL_STEPS = 4
+const TOTAL_STEPS = 5
 
 // ── Tipler ──────────────────────────────────────────────────────
 
@@ -176,14 +177,34 @@ function Step2({ skills, setSkills }: { skills: string[]; setSkills: (skills: st
 
 // ── ADIM 3: CV yükleme ───────────────────────────────────────────
 
-interface Step3Props {
+// ── ADIM 3: Arama tercihleri ─────────────────────────────────────
+
+function StepSearchPrefs({
+  value,
+  onChange,
+}: {
+  value: SearchPreferences
+  onChange: (next: SearchPreferences) => void
+}) {
+  return (
+    <div>
+      <h2 className="text-2xl font-bold text-white mb-1">Ne arıyorsun?</h2>
+      <p className="text-gray-500 text-sm mb-8">
+        İlan aramaları bu tercihlerden kurulur — en az bir rol girmen gerekiyor.
+      </p>
+      <SearchPreferencesFields value={value} onChange={onChange} />
+    </div>
+  )
+}
+
+interface StepCvProps {
   cvFile: File | null
   setCvFile: (f: File | null) => void
   onUploaded: (profile: ProfileResponse) => void
   onError: (msg: string) => void
 }
 
-function Step3({ cvFile, setCvFile, onUploaded, onError }: Step3Props) {
+function StepCv({ cvFile, setCvFile, onUploaded, onError }: StepCvProps) {
   const [isParsing, setIsParsing] = useState(false)
   const [parsed, setParsed]       = useState<ParsedCv | null>(null)
 
@@ -235,13 +256,13 @@ function Step3({ cvFile, setCvFile, onUploaded, onError }: Step3Props) {
 
 const TELEGRAM_POLL_INTERVAL_MS = 3000
 
-interface Step4Props {
+interface StepTelegramProps {
   isLinked: boolean
   onLinked: () => void
   onError: (msg: string) => void
 }
 
-function Step4({ isLinked, onLinked, onError }: Step4Props) {
+function StepTelegram({ isLinked, onLinked, onError }: StepTelegramProps) {
   const [botUrl, setBotUrl] = useState<string>("")
   const [isFetchingLink, setIsFetchingLink] = useState(true)
   const isMobile = useIsMobile()
@@ -367,6 +388,9 @@ function OnboardingPageContent() {
 
   const [profileInfo, setProfileInfo] = useState<ProfileInfo>({ name: "", university: "", gradYear: "" })
   const [skills, setSkills]           = useState<string[]>([])
+  const [prefs, setPrefs]             = useState<SearchPreferences>({
+    locations: [], workMode: "any", roles: [], levels: [],
+  })
   const [cvFile, setCvFile]           = useState<File | null>(null)
   const [hasCvOnServer, setHasCvOnServer] = useState(false)
   const [isTelegramLinked, setIsTelegramLinked] = useState(false)
@@ -388,6 +412,12 @@ function OnboardingPageContent() {
       gradYear:   profile.graduation_year ? String(profile.graduation_year) : "",
     })
     setSkills(profile.skills ?? [])
+    setPrefs({
+      locations: profile.search_locations ?? [],
+      workMode:  profile.work_mode || "any",
+      roles:     profile.target_roles ?? [],
+      levels:    profile.target_levels ?? [],
+    })
     setHasCvOnServer(!!profile.cv_filename)
     setIsTelegramLinked(!!profile.telegram_chat_id)
   }
@@ -399,8 +429,9 @@ function OnboardingPageContent() {
   const stepValidators: Record<number, boolean> = {
     1: !!(profileInfo.name.trim() && profileInfo.university.trim() && profileInfo.gradYear),
     2: skills.length > 0,
-    3: !!cvFile || hasCvOnServer,
-    4: true,
+    3: prefs.roles.length > 0,   // rol yoksa sorgu kurulmaz → kullanıcı hiç taranmaz
+    4: !!cvFile || hasCvOnServer,
+    5: true,
   }
 
   async function handleNext() {
@@ -415,6 +446,13 @@ function OnboardingPageContent() {
         })
       } else if (step === 2) {
         await api.put("/profile/me/skills", { skills })
+      } else if (step === 3) {
+        await api.put("/profile/me/search-preferences", {
+          search_locations: prefs.locations,
+          work_mode: prefs.workMode,
+          target_roles: prefs.roles,
+          target_levels: prefs.levels,
+        })
       }
       // Adım 3 ve 4 ek API çağrısı yapmıyor:
       //  - 3: CV upload'ı Step3 component'i kendi içinde halletti
@@ -455,16 +493,17 @@ function OnboardingPageContent() {
 
             {step === 1 && <Step1 profileInfo={profileInfo} onChange={updateProfileInfo} />}
             {step === 2 && <Step2 skills={skills} setSkills={setSkills} />}
-            {step === 3 && (
-              <Step3
+            {step === 3 && <StepSearchPrefs value={prefs} onChange={setPrefs} />}
+            {step === 4 && (
+              <StepCv
                 cvFile={cvFile}
                 setCvFile={setCvFile}
                 onUploaded={applyProfileToState}
                 onError={setErrorMessage}
               />
             )}
-            {step === 4 && (
-              <Step4
+            {step === 5 && (
+              <StepTelegram
                 isLinked={isTelegramLinked}
                 onLinked={() => setIsTelegramLinked(true)}
                 onError={setErrorMessage}
