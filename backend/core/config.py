@@ -41,6 +41,11 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     groq_model: str = "llama-3.3-70b-versatile"
 
+    # Günlük tarama saati (Europe/Istanbul). Hem Celery beat hem dashboard'daki
+    # "sıradaki tarama" bilgisi buradan okur — iki yerde tutulunca kayıyordu.
+    scan_hour: int = 20
+    scan_minute: int = 30
+
     # Scraper
     search_location: str = "Istanbul, Turkey"
     jobs_per_query: int = 15

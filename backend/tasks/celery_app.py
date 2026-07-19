@@ -45,7 +45,7 @@ celery_app.conf.update(
     beat_schedule={
         "scan-evening": {
             "task": "enqueue_all_user_scans",
-            "schedule": crontab(hour=20, minute=30),
+            "schedule": crontab(hour=settings.scan_hour, minute=settings.scan_minute),
         },
     },
 )

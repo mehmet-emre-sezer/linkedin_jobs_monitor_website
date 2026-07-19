@@ -8,14 +8,16 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from core.config import settings
 from models.job import Job
 from models.profile import Profile
 from models.scan_run import ScanRun
 from schemas.dashboard import DashboardSummary, JobItem, QueryStat
 
 
-# TODO Faz 6: Celery scheduler yerleşince son ScanRun'a göre hesaplanacak.
-DEFAULT_NEXT_SCAN_AT = "18:00"
+# Tarama saati tek yerde: core.config. Burada ayrıca sabit tutulunca beat
+# schedule ile kayıyordu (dashboard 18:00 gösterirken tarama 19:00'daydı).
+DEFAULT_NEXT_SCAN_AT = f"{settings.scan_hour:02d}:{settings.scan_minute:02d}"
 
 
 def _week_ago() -> datetime:
