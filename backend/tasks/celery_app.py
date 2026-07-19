@@ -38,19 +38,14 @@ celery_app.conf.update(
     # Worker başına aynı anda 1 task — Faz 6 kararı (LinkedIn ban riski)
     worker_concurrency=1,
     worker_prefetch_multiplier=1,   # tek seferde 1 task çek, sırada bekletme
-    # Beat schedule — Türkiye saatiyle günde 3 kez
+    # Beat schedule — Türkiye saatiyle günde 1 kez, akşam 20:30.
+    # LinkedIn sorgusu son 24 saati tarıyor (f_TPR=r86400), bu yüzden günde tek
+    # tarama pencereyle birebir örtüşüyor: ilan kaçmıyor, aynı pencere tekrar
+    # taranmadığı için proxy trafiği ve AI token'ı boşa gitmiyor.
     beat_schedule={
-        "scan-morning": {
-            "task": "enqueue_all_user_scans",
-            "schedule": crontab(hour=9,  minute=0),
-        },
-        "scan-noon": {
-            "task": "enqueue_all_user_scans",
-            "schedule": crontab(hour=14, minute=0),
-        },
         "scan-evening": {
             "task": "enqueue_all_user_scans",
-            "schedule": crontab(hour=19, minute=0),
+            "schedule": crontab(hour=20, minute=30),
         },
     },
 )

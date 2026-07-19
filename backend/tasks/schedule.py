@@ -8,6 +8,7 @@ concurrency=1 olduğu için kullanıcılar sırayla işlenir → LinkedIn ban ri
 import logging
 
 from core.database import SessionLocal
+from models.profile import Profile
 from models.user import User
 from tasks.celery_app import celery_app
 from tasks.scan_user import scan_user
@@ -24,10 +25,19 @@ def enqueue_all_user_scans(self) -> dict:
         # Admin hesapları operasyon hesabı — zamanlanmış taramaya girmez.
         # (/admin "Test et" düğmesi scan_user'ı doğrudan çağırdığı için elle
         # tetikleme yine çalışır.)
+        #
+        # Telegram bağlı değilse taranmaz: tarama proxy trafiği ve AI token'ı
+        # harcıyor, sonuç teslim edilemiyor. Kullanıcı botu bağlayınca bir
+        # sonraki taramada otomatik dahil olur.
         user_ids = [
             row[0]
             for row in db.query(User.id)
-            .filter(User.is_email_verified.is_(True), User.is_admin.is_(False))
+            .join(Profile, Profile.user_id == User.id)
+            .filter(
+                User.is_email_verified.is_(True),
+                User.is_admin.is_(False),
+                Profile.telegram_chat_id.isnot(None),
+            )
             .order_by(User.id)
             .all()
         ]
