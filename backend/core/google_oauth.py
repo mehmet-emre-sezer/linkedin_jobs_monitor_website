@@ -13,6 +13,7 @@ class GoogleUserInfo:
     google_id: str   # Google'da değişmez kullanıcı kimliği (sub)
     email: str
     is_email_verified: bool
+    name: str        # Onboarding'de ad soyad alanını ön-doldurmak için
 
 
 def verify_google_id_token(token: str) -> GoogleUserInfo:
@@ -30,4 +31,6 @@ def verify_google_id_token(token: str) -> GoogleUserInfo:
         google_id=payload["sub"],
         email=payload["email"],
         is_email_verified=bool(payload.get("email_verified", False)),
+        # `name` varsayılan profile scope'unda gelir; yoksa boş bırakılır.
+        name=(payload.get("name") or "").strip(),
     )

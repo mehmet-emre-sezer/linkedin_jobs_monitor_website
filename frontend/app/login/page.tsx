@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation"
 import { APP_NAME } from "@/constants/app"
 import { api, extractErrorMessage } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
+import { resolvePostLoginPath } from "@/lib/post-login-redirect"
 import type { TokenResponse } from "@/lib/auth-types"
-import type { ProfileResponse } from "@/lib/profile-types"
 import RightPanel from "@/components/auth/RightPanel"
 import GoogleButton from "@/components/auth/GoogleButton"
 import EyeIcon from "@/components/auth/EyeIcon"
@@ -35,20 +35,7 @@ export default function LoginPage() {
 
       // Admin → direkt panel (onboarding akışına girmez).
       // is_admin backend'den geliyor; gerçek güvenlik require_admin + AdminGuard'da.
-      if (data.user.is_admin) {
-        router.push("/admin")
-        return
-      }
-
-      // Sert kapı: e-posta doğrulanmamışsa doğrulama ekranına gönder.
-      if (!data.user.is_email_verified) {
-        router.push("/verify-email")
-        return
-      }
-
-      // Normal kullanıcı: onboarding'i bitiren dashboard'a, bitirmeyen onboarding'e gider.
-      const { data: profile } = await api.get<ProfileResponse>("/profile/me")
-      router.push(profile.onboarding_completed ? "/dashboard" : "/onboarding")
+      router.push(await resolvePostLoginPath(data.user))
     } catch (err) {
       setError(extractErrorMessage(err))
     } finally {

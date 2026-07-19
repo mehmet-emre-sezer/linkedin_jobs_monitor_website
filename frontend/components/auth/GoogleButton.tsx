@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google"
 import { api, extractErrorMessage } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
+import { resolvePostLoginPath } from "@/lib/post-login-redirect"
 import type { TokenResponse } from "@/lib/auth-types"
 
 interface Props {
@@ -28,7 +29,7 @@ export default function GoogleButton({ onError }: Props) {
         id_token: response.credential,
       })
       login(data)
-      router.push(data.user.is_email_verified ? "/dashboard" : "/onboarding")
+      router.push(await resolvePostLoginPath(data.user))
     } catch (err) {
       onError?.(extractErrorMessage(err))
     } finally {

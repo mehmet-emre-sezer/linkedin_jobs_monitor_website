@@ -141,7 +141,13 @@ def google_login(data: GoogleLoginRequest, db: Session = Depends(get_db)) -> Tok
             detail="Google doğrulaması başarısız.",
         )
 
-    user, token = auth_service.login_or_register_with_google(db, google_user)
+    try:
+        user, token = auth_service.login_or_register_with_google(db, google_user)
+    except InvalidCredentialsError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Google hesabının e-posta adresi doğrulanmamış.",
+        )
     return TokenResponse(access_token=token, user=user)
 
 

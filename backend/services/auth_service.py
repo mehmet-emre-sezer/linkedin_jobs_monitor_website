@@ -17,6 +17,7 @@ from core.security import (
     hash_password,
     verify_password,
 )
+from models.profile import Profile
 from models.user import User
 from schemas.user import UserCreate, UserLogin
 from services import email_service
@@ -87,7 +88,15 @@ def request_password_reset(db: Session, email: str) -> None:
 
 
 def login_or_register_with_google(db: Session, google_user: GoogleUserInfo) -> tuple[User, str]:
-    """Google ile gelen kullanıcıyı bul veya oluştur, JWT döndür."""
+    """Google ile gelen kullanıcıyı bul veya oluştur, JWT döndür.
+
+    Google e-postayı doğrulamamışsa giriş reddedilir: doğrulanmamış adrese
+    güvenirsek, kurbanın adresiyle Google hesabı açan biri mevcut hesabı ele
+    geçirebilir.
+    """
+    if not google_user.is_email_verified:
+        raise InvalidCredentialsError()
+
     # Önce google_id ile ara
     user = db.query(User).filter(User.google_id == google_user.google_id).first()
 
@@ -105,10 +114,13 @@ def login_or_register_with_google(db: Session, google_user: GoogleUserInfo) -> t
             is_email_verified=google_user.is_email_verified,
         )
         db.add(user)
+        db.flush()  # user.id lazım
+
+        # Onboarding'de ad soyad hazır gelsin (kullanıcı değiştirebilir)
+        db.add(Profile(user_id=user.id, skills=[], name=google_user.name or None))
     else:
-        # Mevcut hesap — Google email zaten doğruladıysa bizim de doğrulanmış kabul ettiğimizden emin ol
-        if google_user.is_email_verified:
-            user.is_email_verified = True
+        # Google e-postayı doğruladı (yukarıda garanti edildi) → bizde de doğrulanmış say
+        user.is_email_verified = True
 
     user.last_seen_at = datetime.now(timezone.utc)
     db.commit()
