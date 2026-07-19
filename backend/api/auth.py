@@ -11,6 +11,7 @@ from core.exceptions import (
     UserNotFoundError,
 )
 from core.google_oauth import verify_google_id_token
+from core.rate_limit import rate_limit
 from models.user import User
 from schemas.user import (
     EmailOnlyRequest,
@@ -37,6 +38,9 @@ def ping():
     "/register",
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[
+        Depends(rate_limit(max_requests=5, window_seconds=3600, scope="register"))
+    ],
 )
 def register(data: UserCreate, db: Session = Depends(get_db)) -> UserResponse:
     """Yeni kullanıcı kaydı. Doğrulama emaili gönderilir."""
@@ -50,7 +54,13 @@ def register(data: UserCreate, db: Session = Depends(get_db)) -> UserResponse:
     return user
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post(
+    "/login",
+    response_model=TokenResponse,
+    dependencies=[
+        Depends(rate_limit(max_requests=10, window_seconds=300, scope="login"))
+    ],
+)
 def login(data: UserLogin, db: Session = Depends(get_db)) -> TokenResponse:
     """E-posta ve şifre ile giriş."""
     try:
@@ -96,13 +106,25 @@ def verify_email(data: VerifyEmailRequest, db: Session = Depends(get_db)) -> Use
     return user
 
 
-@router.post("/resend-verification", status_code=status.HTTP_204_NO_CONTENT)
+@router.post(
+    "/resend-verification",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[
+        Depends(rate_limit(max_requests=3, window_seconds=3600, scope="resend"))
+    ],
+)
 def resend_verification(data: EmailOnlyRequest, db: Session = Depends(get_db)) -> None:
     """Doğrulama emailini tekrar gönder. Email kayıtlı değilse bile 204 dön (enumeration önlemi)."""
     auth_service.resend_verification_email(db, data.email)
 
 
-@router.post("/forgot-password", status_code=status.HTTP_204_NO_CONTENT)
+@router.post(
+    "/forgot-password",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[
+        Depends(rate_limit(max_requests=3, window_seconds=3600, scope="forgot"))
+    ],
+)
 def forgot_password(data: EmailOnlyRequest, db: Session = Depends(get_db)) -> None:
     """Parola sıfırlama emaili gönder. Email kayıtlı değilse bile 204 dön (enumeration önlemi)."""
     auth_service.request_password_reset(db, data.email)
