@@ -45,8 +45,14 @@ export default function PrivacyPage() {
           <p>
             <strong className="text-gray-300">Hesap bilgileri:</strong> e-posta
             adresin, parolan (geri döndürülemez şekilde şifrelenmiş olarak saklanır),
-            Google ile giriş yaptıysan Google hesap kimliğin, kayıt ve son giriş
-            tarihlerin.
+            kayıt ve son giriş tarihlerin.
+          </p>
+          <p>
+            <strong className="text-gray-300">Google ile giriş yaptıysan:</strong>{" "}
+            Google hesap kimliğin, e-posta adresin ve ad soyadın. Ad soyad yalnızca
+            profilini önceden doldurmak için kullanılır ve dilediğin zaman
+            değiştirebilirsin. Profil fotoğrafın veya Google hesabındaki diğer
+            bilgilere erişmiyoruz.
           </p>
           <p>
             <strong className="text-gray-300">Profil bilgileri:</strong> ad soyad,
