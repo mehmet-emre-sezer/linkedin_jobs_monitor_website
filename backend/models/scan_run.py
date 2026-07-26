@@ -6,7 +6,7 @@ from core.database import Base
 
 
 class ScanRun(Base):
-    """Bir kullanıcı için yapılan tek bir tarama (günde ~3 kez)."""
+    """Bir kullanıcı için yapılan tek bir tarama (günde 1 kez, akşam)."""
 
     __tablename__ = "scan_runs"
 

@@ -75,5 +75,5 @@
   <text x="100" y="496" font-size="7.5" fill="#2563eb" font-family="system-ui, sans-serif">İlana git →</text>
 
   <!-- Alt etiket -->
-  <text x="240" y="570" text-anchor="middle" font-size="10" fill="#1e3a5f" font-family="system-ui, sans-serif">Günde 3 kez · otomatik · puanlanmış</text>
+  <text x="240" y="570" text-anchor="middle" font-size="10" fill="#1e3a5f" font-family="system-ui, sans-serif">Her akşam · otomatik · puanlanmış</text>
 </svg>

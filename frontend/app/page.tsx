@@ -5,12 +5,12 @@ const steps = [
   { number: "01", title: "Profilini oluştur",        desc: "CV'ni yükle, sistem seni tanısın." },
   { number: "02", title: "Aramalar otomatik kurulur", desc: "Yapay zeka, profiline göre LinkedIn arama sorgularını hazırlar." },
   { number: "03", title: "Telegram'a bağlan",         desc: "Bota /start yaz, bildirimler anında gelsin." },
-  { number: "04", title: "Bekle, biz tarayalım",      desc: "Her gün 3 kez LinkedIn taranır, sana uygun ilanlar puanlanır ve iletilir." },
+  { number: "04", title: "Bekle, biz tarayalım",      desc: "Her akşam LinkedIn taranır, sana uygun ilanlar puanlanır ve iletilir." },
 ]
 
 const features = [
   { icon: "🎯", title: "Skor tabanlı filtreleme", desc: "Her ilan profilinle kıyaslanır, 100 üzerinden puanlanır. Düşük puanlı ilanlar sana gelmiyor." },
-  { icon: "⚡", title: "Günde 3 tarama",          desc: "Sabah, öğlen, akşam. Yeni bir ilan açıldığında saatler içinde haberin olur." },
+  { icon: "⚡", title: "Her akşam tarama",         desc: "Her akşam LinkedIn taranır, o gün açılan yeni ilanlardan haberin olur." },
   { icon: "🤖", title: "Akıllı sorgular",         desc: "Arama sorguları zamanla optimize edilir, daha az gürültü daha fazla isabet." },
   { icon: "📲", title: "Telegram bildirimleri",   desc: "Uygulama kurmak yok. Zaten kullandığın Telegram üzerinden." },
 ]

@@ -1,6 +1,6 @@
 const chips = [
   { num: "01", label: "CV yükle",          sub: "Sistem seni tanısın" },
-  { num: "02", label: "Biz tarayalım",     sub: "Günde 3 kez LinkedIn" },
+  { num: "02", label: "Biz tarayalım",     sub: "Her akşam LinkedIn" },
   { num: "03", label: "Telegram'a gelsin", sub: "Puanlı ilanlar gelir" },
 ]
 
