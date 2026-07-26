@@ -11,6 +11,7 @@ from models.job import Job
 from models.scan_run import ScanRun
 from models.search_query import SearchQuery
 from models.error_log import ErrorLog
+from models.subscription import Subscription
 
 __all__ = [
     "User",
@@ -19,4 +20,5 @@ __all__ = [
     "ScanRun",
     "SearchQuery",
     "ErrorLog",
+    "Subscription",
 ]

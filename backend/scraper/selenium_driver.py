@@ -5,6 +5,8 @@ Proxy user:pass ise auth yerel bir relay ile sağlanır (Chrome inline proxy
 şifresini ve headless'ta auth extension'ını güvenilir desteklemez).
 """
 
+import json
+import logging
 import random
 import time
 
@@ -16,10 +18,14 @@ from selenium.webdriver.common.by import By
 from core.config import settings
 from scraper.proxy_relay import ensure_relay
 
+logger = logging.getLogger(__name__)
+
 
 def build_driver() -> webdriver.Chrome:
     """Headless Chrome — anti-detection, resim kapalı, opsiyonel residential proxy."""
     options = Options()
+    # Performance log'u aç: aktarılan bayt (proxy maliyeti) ölçümü için gerekli.
+    options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
@@ -75,6 +81,28 @@ def build_driver() -> webdriver.Chrome:
 def delay(min_s: float = 2, max_s: float = 5) -> None:
     """Rastgele bekleme — bot davranışı insanımsı görünsün."""
     time.sleep(random.uniform(min_s, max_s))
+
+
+def transferred_bytes(driver: webdriver.Chrome) -> int:
+    """Oturum boyunca ağ üzerinden aktarılan toplam baytı döndür.
+
+    Network.loadingFinished olaylarındaki `encodedDataLength` sıkıştırılmış
+    (tel üstünden giden) bayt sayısıdır — IPRoyal'in faturaladığı büyüklük.
+    get_log tamponu boşalttığı için oturum sonunda bir kez çağrılmalı.
+    Ölçüm başarısızsa (log yoksa) 0 döner; asla taramayı bozmaz.
+    """
+    total = 0
+    try:
+        for entry in driver.get_log("performance"):
+            try:
+                message = json.loads(entry["message"])["message"]
+                if message["method"] == "Network.loadingFinished":
+                    total += int(message["params"].get("encodedDataLength", 0))
+            except (KeyError, ValueError, TypeError):
+                continue
+    except Exception as exc:
+        logger.debug("Bayt ölçümü alınamadı: %s", exc)
+    return total
 
 
 def dismiss_signin_modal(driver: webdriver.Chrome) -> None:

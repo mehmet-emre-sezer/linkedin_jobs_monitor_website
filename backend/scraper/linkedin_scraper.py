@@ -17,7 +17,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from scraper.selenium_driver import build_driver, delay, dismiss_signin_modal
+from scraper.selenium_driver import (
+    build_driver,
+    delay,
+    dismiss_signin_modal,
+    transferred_bytes,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +50,11 @@ def scrape_jobs(
                     job["source_query"] = query
                 all_jobs.extend(jobs)
                 delay(3, 7)
+
+        # Proxy maliyet takibi: bu taramanın harcadığı bant genişliği.
+        # Fiyatlandırmayı gerçek veriye oturtmak için (bkz. abonelik planı).
+        used_mb = transferred_bytes(driver) / (1024 * 1024)
+        logger.info("Tarama bant genişliği: %.2f MB (%d ilan)", used_mb, len(all_jobs))
     finally:
         driver.quit()
 
