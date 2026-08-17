@@ -64,6 +64,16 @@ class Settings(BaseSettings):
     proxy_username: str = ""
     proxy_password: str = ""
 
+    # iyzico ödeme. Sandbox: https://sandbox-api.iyzipay.com — gerçek:
+    # https://api.iyzipay.com. Anahtarlar iyzico panelinden alınır.
+    iyzico_api_key: str = ""
+    iyzico_secret_key: str = ""
+    iyzico_base_url: str = "https://sandbox-api.iyzipay.com"
+
+    # Abonelik planı
+    subscription_price_try: str = "79.00"   # aylık ücret (TL)
+    subscription_trial_days: int = 5
+
     class Config:
         env_file = ".env"
 

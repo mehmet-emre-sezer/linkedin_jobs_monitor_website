@@ -1,13 +1,15 @@
 import Link from "next/link"
 import { APP_NAME } from "@/constants/app"
+import { COMPANY } from "@/constants/company"
+import SiteFooter from "@/components/SiteFooter"
 
 export const metadata = {
   title: `Gizlilik Politikası · ${APP_NAME}`,
   description: `${APP_NAME} hangi kişisel verileri topluyor, neden işliyor ve kimlerle paylaşıyor.`,
 }
 
-const LAST_UPDATED = "20 Temmuz 2026"
-const CONTACT_EMAIL = "iletisim@ispusulasi.com"
+const LAST_UPDATED = "1 Ağustos 2026"
+const CONTACT_EMAIL = COMPANY.email
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -38,6 +40,23 @@ export default function PrivacyPage() {
             çalışır. Bunu yapabilmek için becerilerini, arama tercihlerini ve
             (yüklersen) CV&apos;ni işleriz. Verini reklam amacıyla kullanmayız ve
             üçüncü taraflara satmayız.
+          </p>
+        </Section>
+
+        <Section title="Veri Sorumlusu">
+          <p>
+            Kişisel verilerin veri sorumlusu{" "}
+            <strong className="text-gray-300">{COMPANY.legalName}</strong>&apos;dir.
+          </p>
+          <p>
+            Adres: {COMPANY.address}
+            <br />
+            Vergi Dairesi / No: {COMPANY.taxOffice} · {COMPANY.taxNumber}
+            <br />
+            E-posta:{" "}
+            <a href={`mailto:${COMPANY.email}`} className="text-blue-400 hover:text-blue-300">
+              {COMPANY.email}
+            </a>
           </p>
         </Section>
 
@@ -107,6 +126,12 @@ export default function PrivacyPage() {
             <li>
               <strong className="text-gray-300">Resend:</strong> doğrulama ve parola
               sıfırlama e-postaları için e-posta adresin kullanılır.
+            </li>
+            <li>
+              <strong className="text-gray-300">iyzico:</strong> abonelik ödemeleri
+              iyzico altyapısı üzerinden alınır. Kart bilgilerin doğrudan iyzico&apos;ya
+              girilir; tarafımızca görülmez ve saklanmaz. Ödemeyi ilişkilendirmek için
+              ad, e-posta ve fatura bilgilerin iyzico ile paylaşılır.
             </li>
             <li>
               <strong className="text-gray-300">Railway ve Vercel:</strong> uygulama
@@ -189,6 +214,7 @@ export default function PrivacyPage() {
           bağlantısı, ortaklığı veya onayı yoktur.
         </p>
       </main>
+      <SiteFooter />
     </div>
   )
 }
