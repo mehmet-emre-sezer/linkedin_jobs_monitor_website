@@ -29,3 +29,4 @@ groq==0.13.0
 # Background tasks
 celery==5.4.0
 redis==5.2.1
+iyzipay==1.0.46
