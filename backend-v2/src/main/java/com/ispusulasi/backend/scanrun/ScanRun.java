@@ -32,7 +32,7 @@ public class ScanRun {
     @Column(name = "jobs_sent", nullable = false)
     private int jobsSent;
 
-    protected ScanRun() {}
+    public ScanRun() {}
 
     public Integer getId() { return id; }
     public Integer getUserId() { return userId; }

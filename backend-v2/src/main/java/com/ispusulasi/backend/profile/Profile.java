@@ -31,6 +31,12 @@ public class Profile {
     @Column(name = "cv_filename")
     private String cvFilename;
 
+    @Column(name = "cv_text")
+    private String cvText;
+
+    @Column(name = "telegram_chat_id")
+    private String telegramChatId;
+
     @Column(name = "onboarding_completed", nullable = false)
     private boolean onboardingCompleted;
 
@@ -59,7 +65,7 @@ public class Profile {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    protected Profile() {}
+    public Profile() {}
 
     public Integer getId() { return id; }
     public Integer getUserId() { return userId; }
@@ -72,6 +78,10 @@ public class Profile {
     public void setGraduationYear(Integer graduationYear) { this.graduationYear = graduationYear; }
     public String getCvFilename() { return cvFilename; }
     public void setCvFilename(String cvFilename) { this.cvFilename = cvFilename; }
+    public String getCvText() { return cvText; }
+    public void setCvText(String cvText) { this.cvText = cvText; }
+    public String getTelegramChatId() { return telegramChatId; }
+    public void setTelegramChatId(String telegramChatId) { this.telegramChatId = telegramChatId; }
     public boolean isOnboardingCompleted() { return onboardingCompleted; }
     public void setOnboardingCompleted(boolean onboardingCompleted) { this.onboardingCompleted = onboardingCompleted; }
     public String getWorkMode() { return workMode; }

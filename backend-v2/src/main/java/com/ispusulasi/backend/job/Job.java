@@ -56,7 +56,7 @@ public class Job {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    protected Job() {}
+    public Job() {}
 
     public Integer getId() { return id; }
     public Integer getUserId() { return userId; }

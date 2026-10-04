@@ -1,6 +1,9 @@
 package com.ispusulasi.backend.profile;
 
 import com.ispusulasi.backend.common.error.NotFoundException;
+import com.ispusulasi.backend.cv.CvAnalysisResult;
+import com.ispusulasi.backend.cv.CvAnalysisService;
+import com.ispusulasi.backend.cv.CvTextExtractor;
 import com.ispusulasi.backend.profile.web.ProfileResponse;
 import com.ispusulasi.backend.profile.web.UpdateProfileRequest;
 import com.ispusulasi.backend.user.User;
@@ -15,10 +18,46 @@ public class ProfileService {
 
     private final ProfileRepository profileRepository;
     private final UserRepository userRepository;
+    private final CvTextExtractor cvTextExtractor;
+    private final CvAnalysisService cvAnalysisService;
 
-    public ProfileService(ProfileRepository profileRepository, UserRepository userRepository) {
+    public ProfileService(ProfileRepository profileRepository,
+                          UserRepository userRepository,
+                          CvTextExtractor cvTextExtractor,
+                          CvAnalysisService cvAnalysisService) {
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
+        this.cvTextExtractor = cvTextExtractor;
+        this.cvAnalysisService = cvAnalysisService;
+    }
+
+    /** CV yukle: PDF'ten metin cikar -> Gemini ile analiz et -> Profile'i doldur. */
+    public ProfileResponse applyCv(String email, String filename, byte[] pdfBytes) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Kullanıcı bulunamadı: " + email));
+
+        String cvText = cvTextExtractor.extractText(pdfBytes);
+        CvAnalysisResult analysis = cvAnalysisService.analyze(cvText);
+
+        Profile profile = profileRepository.findByUserId(user.getId())
+                .orElseGet(() -> {
+                    Profile created = new Profile();
+                    created.setUserId(user.getId());
+                    created.setOnboardingCompleted(false);
+                    created.setWorkMode("any");
+                    created.setCreatedAt(LocalDateTime.now());
+                    return created;
+                });
+
+        profile.setCvFilename(filename);
+        profile.setCvText(analysis.profileSummary());
+        if (analysis.name() != null) profile.setName(analysis.name());
+        if (analysis.university() != null) profile.setUniversity(analysis.university());
+        if (analysis.graduationYear() != null) profile.setGraduationYear(analysis.graduationYear());
+        if (!analysis.skills().isEmpty()) profile.setSkills(analysis.skills());
+        profile.setUpdatedAt(LocalDateTime.now());
+
+        return toResponse(profileRepository.save(profile));
     }
 
     public ProfileResponse getByUserEmail(String email) {
