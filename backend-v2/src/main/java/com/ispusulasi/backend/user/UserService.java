@@ -1,5 +1,6 @@
 package com.ispusulasi.backend.user;
 
+import com.ispusulasi.backend.common.email.AuthMailService;
 import com.ispusulasi.backend.common.error.ConflictException;
 import com.ispusulasi.backend.common.error.NotFoundException;
 import com.ispusulasi.backend.common.error.UnauthorizedException;
@@ -19,13 +20,16 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final AuthMailService authMailService;
 
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
-                       JwtService jwtService) {
+                       JwtService jwtService,
+                       AuthMailService authMailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.authMailService = authMailService;
     }
 
     public UserResponse register(RegisterRequest request) {
@@ -41,7 +45,38 @@ public class UserService {
         user.setLastSeenAt(LocalDateTime.now());
 
         User saved = userRepository.save(user);
+        authMailService.sendVerificationEmail(saved.getId(), saved.getEmail());
         return toResponse(saved);
+    }
+
+    public void verifyEmail(String token) {
+        Integer userId = parsePurpose(token, JwtService.PURPOSE_EMAIL_VERIFICATION);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Kullanıcı bulunamadı"));
+        user.setEmailVerified(true);
+        userRepository.save(user);
+    }
+
+    public void requestPasswordReset(String email) {
+        // Email enumeration onleme: kullanici yoksa bile sessizce basarili don
+        userRepository.findByEmail(email).ifPresent(user ->
+                authMailService.sendPasswordResetEmail(user.getId(), user.getEmail()));
+    }
+
+    public void resetPassword(String token, String newPassword) {
+        Integer userId = parsePurpose(token, JwtService.PURPOSE_PASSWORD_RESET);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Kullanıcı bulunamadı"));
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    private Integer parsePurpose(String token, String purpose) {
+        try {
+            return jwtService.parsePurposeToken(token, purpose);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Geçersiz veya süresi dolmuş token");
+        }
     }
 
     public LoginResponse login(LoginRequest request) {

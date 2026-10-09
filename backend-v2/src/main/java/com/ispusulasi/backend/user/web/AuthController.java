@@ -25,4 +25,22 @@ public class AuthController {
     public LoginResponse login(@Valid @RequestBody LoginRequest request) {
         return userService.login(request);
     }
+
+    @PostMapping("/verify-email")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
+        userService.verifyEmail(request.token());
+    }
+
+    @PostMapping("/forgot-password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        userService.requestPasswordReset(request.email());
+    }
+
+    @PostMapping("/reset-password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        userService.resetPassword(request.token(), request.password());
+    }
 }
