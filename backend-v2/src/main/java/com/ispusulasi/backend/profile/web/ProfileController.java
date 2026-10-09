@@ -45,6 +45,16 @@ public class ProfileController {
                 authentication.getName(), file.getOriginalFilename(), file.getBytes());
     }
 
+    @PostMapping("/me/telegram-link")
+    public TelegramLinkResponse telegramLink(Authentication authentication) {
+        return new TelegramLinkResponse(profileService.createTelegramLink(authentication.getName()));
+    }
+
+    @PostMapping("/me/complete-onboarding")
+    public ProfileResponse completeOnboarding(Authentication authentication) {
+        return profileService.completeOnboarding(authentication.getName());
+    }
+
     private void validatePdf(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Dosya boş");

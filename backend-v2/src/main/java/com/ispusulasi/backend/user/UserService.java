@@ -4,6 +4,7 @@ import com.ispusulasi.backend.common.email.AuthMailService;
 import com.ispusulasi.backend.common.error.ConflictException;
 import com.ispusulasi.backend.common.error.NotFoundException;
 import com.ispusulasi.backend.common.error.UnauthorizedException;
+import com.ispusulasi.backend.common.security.GoogleTokenVerifier;
 import com.ispusulasi.backend.common.security.JwtService;
 import com.ispusulasi.backend.user.web.LoginRequest;
 import com.ispusulasi.backend.user.web.LoginResponse;
@@ -21,15 +22,18 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthMailService authMailService;
+    private final GoogleTokenVerifier googleTokenVerifier;
 
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        JwtService jwtService,
-                       AuthMailService authMailService) {
+                       AuthMailService authMailService,
+                       GoogleTokenVerifier googleTokenVerifier) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authMailService = authMailService;
+        this.googleTokenVerifier = googleTokenVerifier;
     }
 
     public UserResponse register(RegisterRequest request) {
@@ -47,6 +51,38 @@ public class UserService {
         User saved = userRepository.save(user);
         authMailService.sendVerificationEmail(saved.getId(), saved.getEmail());
         return toResponse(saved);
+    }
+
+    public LoginResponse loginWithGoogle(String idToken) {
+        GoogleUserInfo info;
+        try {
+            info = googleTokenVerifier.verify(idToken);
+        } catch (Exception e) {
+            throw new UnauthorizedException("Google doğrulaması başarısız");
+        }
+
+        if (!info.emailVerified()) {
+            throw new UnauthorizedException("Google hesabının e-posta adresi doğrulanmamış");
+        }
+
+        User user = userRepository.findByEmail(info.email()).orElseGet(() -> {
+            User created = new User();
+            created.setEmail(info.email());
+            created.setGoogleId(info.googleId());
+            created.setEmailVerified(true);  // Google zaten dogruladi
+            created.setAdmin(false);
+            created.setCreatedAt(LocalDateTime.now());
+            created.setLastSeenAt(LocalDateTime.now());
+            return created;
+        });
+
+        // Email ile kayitli mevcut kullaniciysa Google kimligini bagla
+        if (user.getGoogleId() == null) {
+            user.setGoogleId(info.googleId());
+        }
+        User saved = userRepository.save(user);
+
+        return new LoginResponse(jwtService.generateToken(saved.getEmail()));
     }
 
     public void verifyEmail(String token) {
@@ -96,6 +132,13 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Kullanıcı bulunamadı: " + id));
         return toResponse(user);
+    }
+
+    public void deleteAccount(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Kullanıcı bulunamadı: " + email));
+        // Iliskili profile/jobs/scan_runs/search_queries DB'de ON DELETE CASCADE ile silinir
+        userRepository.delete(user);
     }
 
     public UserResponse getByEmail(String email) {

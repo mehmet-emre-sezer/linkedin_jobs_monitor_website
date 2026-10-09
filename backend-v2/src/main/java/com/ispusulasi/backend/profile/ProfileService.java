@@ -8,9 +8,14 @@ import com.ispusulasi.backend.profile.web.ProfileResponse;
 import com.ispusulasi.backend.profile.web.UpdateProfileRequest;
 import com.ispusulasi.backend.user.User;
 import com.ispusulasi.backend.user.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -20,15 +25,80 @@ public class ProfileService {
     private final UserRepository userRepository;
     private final CvTextExtractor cvTextExtractor;
     private final CvAnalysisService cvAnalysisService;
+    private final String telegramBotUsername;
+    private final long telegramLinkExpireMinutes;
 
     public ProfileService(ProfileRepository profileRepository,
                           UserRepository userRepository,
                           CvTextExtractor cvTextExtractor,
-                          CvAnalysisService cvAnalysisService) {
+                          CvAnalysisService cvAnalysisService,
+                          @Value("${app.telegram.bot-username}") String telegramBotUsername,
+                          @Value("${app.telegram.link-expire-minutes}") long telegramLinkExpireMinutes) {
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
         this.cvTextExtractor = cvTextExtractor;
         this.cvAnalysisService = cvAnalysisService;
+        this.telegramBotUsername = telegramBotUsername;
+        this.telegramLinkExpireMinutes = telegramLinkExpireMinutes;
+    }
+
+    /** Onboarding'i tamamlandi olarak isaretle. */
+    public ProfileResponse completeOnboarding(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Kullanıcı bulunamadı: " + email));
+        Profile profile = profileRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new NotFoundException("Bu kullanıcının profili yok"));
+
+        profile.setOnboardingCompleted(true);
+        profile.setUpdatedAt(LocalDateTime.now());
+        return toResponse(profileRepository.save(profile));
+    }
+
+    /** Kullanici icin Telegram deep link uret: kisa opak token + t.me linki. */
+    public String createTelegramLink(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Kullanıcı bulunamadı: " + email));
+
+        Profile profile = profileRepository.findByUserId(user.getId())
+                .orElseGet(() -> {
+                    Profile created = new Profile();
+                    created.setUserId(user.getId());
+                    created.setOnboardingCompleted(false);
+                    created.setWorkMode("any");
+                    created.setCreatedAt(LocalDateTime.now());
+                    return created;
+                });
+
+        String token = generateLinkToken();
+        profile.setTelegramLinkToken(token);
+        profile.setTelegramLinkExpiresAt(Instant.now().plus(telegramLinkExpireMinutes, ChronoUnit.MINUTES));
+        profile.setUpdatedAt(LocalDateTime.now());
+        profileRepository.save(profile);
+
+        return "https://t.me/" + telegramBotUsername + "?start=" + token;
+    }
+
+    /** Bot'tan gelen /start <token> ile chat_id'yi profile'a kaydet (tek kullanimlik). */
+    public void linkTelegramChat(String linkToken, String chatId) {
+        Profile profile = profileRepository.findByTelegramLinkToken(linkToken)
+                .orElseThrow(() -> new IllegalArgumentException("Geçersiz bağlantı"));
+
+        Instant expiresAt = profile.getTelegramLinkExpiresAt();
+        if (expiresAt == null || expiresAt.isBefore(Instant.now())) {
+            throw new IllegalArgumentException("Bağlantının süresi dolmuş");
+        }
+
+        profile.setTelegramChatId(chatId);
+        profile.setTelegramLinkToken(null);       // token tek kullanimlik
+        profile.setTelegramLinkExpiresAt(null);
+        profile.setUpdatedAt(LocalDateTime.now());
+        profileRepository.save(profile);
+    }
+
+    private String generateLinkToken() {
+        byte[] bytes = new byte[24];
+        new SecureRandom().nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
     /** CV yukle: PDF'ten metin cikar -> Gemini ile analiz et -> Profile'i doldur. */

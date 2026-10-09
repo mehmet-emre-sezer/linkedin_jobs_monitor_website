@@ -26,6 +26,11 @@ public class AuthController {
         return userService.login(request);
     }
 
+    @PostMapping("/google")
+    public LoginResponse googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
+        return userService.loginWithGoogle(request.idToken());
+    }
+
     @PostMapping("/verify-email")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {

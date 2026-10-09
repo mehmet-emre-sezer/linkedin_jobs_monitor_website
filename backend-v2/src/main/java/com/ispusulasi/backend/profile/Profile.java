@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,12 @@ public class Profile {
 
     @Column(name = "telegram_chat_id")
     private String telegramChatId;
+
+    @Column(name = "telegram_link_token")
+    private String telegramLinkToken;
+
+    @Column(name = "telegram_link_expires_at")
+    private Instant telegramLinkExpiresAt;
 
     @Column(name = "onboarding_completed", nullable = false)
     private boolean onboardingCompleted;
@@ -82,6 +89,10 @@ public class Profile {
     public void setCvText(String cvText) { this.cvText = cvText; }
     public String getTelegramChatId() { return telegramChatId; }
     public void setTelegramChatId(String telegramChatId) { this.telegramChatId = telegramChatId; }
+    public String getTelegramLinkToken() { return telegramLinkToken; }
+    public void setTelegramLinkToken(String telegramLinkToken) { this.telegramLinkToken = telegramLinkToken; }
+    public Instant getTelegramLinkExpiresAt() { return telegramLinkExpiresAt; }
+    public void setTelegramLinkExpiresAt(Instant telegramLinkExpiresAt) { this.telegramLinkExpiresAt = telegramLinkExpiresAt; }
     public boolean isOnboardingCompleted() { return onboardingCompleted; }
     public void setOnboardingCompleted(boolean onboardingCompleted) { this.onboardingCompleted = onboardingCompleted; }
     public String getWorkMode() { return workMode; }

@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/health", "/api/auth/**").permitAll() // acik kapilar
+                        .requestMatchers("/health", "/api/auth/**", "/api/telegram/webhook").permitAll() // acik kapilar
                         .anyRequest().authenticated()                            // gerisi token ister
                 )
                 .exceptionHandling(ex -> ex
