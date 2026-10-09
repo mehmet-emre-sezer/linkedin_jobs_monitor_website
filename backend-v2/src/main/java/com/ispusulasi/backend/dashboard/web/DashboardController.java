@@ -20,4 +20,10 @@ public class DashboardController {
     public DashboardSummary summary(Authentication authentication) {
         return dashboardService.getSummary(authentication.getName());
     }
+
+    /** Sorgu istatistikleri — scraper henuz uretmiyor, bos liste doner. */
+    @GetMapping("/query-stats")
+    public java.util.List<QueryStatResponse> queryStats(Authentication authentication) {
+        return java.util.List.of();
+    }
 }

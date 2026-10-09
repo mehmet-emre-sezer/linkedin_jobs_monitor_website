@@ -154,14 +154,16 @@ public class ProfileService {
                     return created;
                 });
 
-        profile.setName(request.name());
-        profile.setUniversity(request.university());
-        profile.setGraduationYear(request.graduationYear());
-        profile.setWorkMode(request.workMode() != null ? request.workMode() : "any");
-        profile.setSkills(orEmpty(request.skills()));
-        profile.setTargetRoles(orEmpty(request.targetRoles()));
-        profile.setTargetLevels(orEmpty(request.targetLevels()));
-        profile.setSearchLocations(orEmpty(request.searchLocations()));
+        // Kismi guncelleme: sadece gonderilen (null olmayan) alanlari degistir.
+        // Boylece frontend basic / skills / search-preferences'i ayri ayri gonderebilir.
+        if (request.name() != null) profile.setName(request.name());
+        if (request.university() != null) profile.setUniversity(request.university());
+        if (request.graduationYear() != null) profile.setGraduationYear(request.graduationYear());
+        if (request.workMode() != null) profile.setWorkMode(request.workMode());
+        if (request.skills() != null) profile.setSkills(request.skills());
+        if (request.targetRoles() != null) profile.setTargetRoles(request.targetRoles());
+        if (request.targetLevels() != null) profile.setTargetLevels(request.targetLevels());
+        if (request.searchLocations() != null) profile.setSearchLocations(request.searchLocations());
         profile.setUpdatedAt(LocalDateTime.now());
 
         Profile saved = profileRepository.save(profile);

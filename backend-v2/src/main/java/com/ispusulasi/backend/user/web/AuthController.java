@@ -37,6 +37,12 @@ public class AuthController {
         userService.verifyEmail(request.token());
     }
 
+    @PostMapping("/resend-verification")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void resendVerification(@Valid @RequestBody ResendVerificationRequest request) {
+        userService.resendVerification(request.email());
+    }
+
     @PostMapping("/forgot-password")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {

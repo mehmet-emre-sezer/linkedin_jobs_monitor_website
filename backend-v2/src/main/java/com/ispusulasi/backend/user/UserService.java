@@ -82,7 +82,7 @@ public class UserService {
         }
         User saved = userRepository.save(user);
 
-        return new LoginResponse(jwtService.generateToken(saved.getEmail()));
+        return new LoginResponse(jwtService.generateToken(saved.getEmail()), toResponse(saved));
     }
 
     public void verifyEmail(String token) {
@@ -91,6 +91,14 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("Kullanıcı bulunamadı"));
         user.setEmailVerified(true);
         userRepository.save(user);
+    }
+
+    public void resendVerification(String email) {
+        userRepository.findByEmail(email).ifPresent(user -> {
+            if (!user.isEmailVerified()) {
+                authMailService.sendVerificationEmail(user.getId(), user.getEmail());
+            }
+        });
     }
 
     public void requestPasswordReset(String email) {
@@ -125,7 +133,7 @@ public class UserService {
         }
 
         String token = jwtService.generateToken(user.getEmail());
-        return new LoginResponse(token);
+        return new LoginResponse(token, toResponse(user));
     }
 
     public UserResponse getById(Integer id) {
