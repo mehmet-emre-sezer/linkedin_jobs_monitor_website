@@ -29,17 +29,20 @@ public class SeleniumDriverFactory {
     private final int proxyPort;
     private final String proxyUsername;
     private final String proxyPassword;
+    private final String chromeBinary;
 
     public SeleniumDriverFactory(ProxyRelay proxyRelay,
                                  @Value("${app.proxy.host:}") String proxyHost,
                                  @Value("${app.proxy.port:0}") int proxyPort,
                                  @Value("${app.proxy.username:}") String proxyUsername,
-                                 @Value("${app.proxy.password:}") String proxyPassword) {
+                                 @Value("${app.proxy.password:}") String proxyPassword,
+                                 @Value("${app.chrome.binary:}") String chromeBinary) {
         this.proxyRelay = proxyRelay;
         this.proxyHost = proxyHost;
         this.proxyPort = proxyPort;
         this.proxyUsername = proxyUsername;
         this.proxyPassword = proxyPassword;
+        this.chromeBinary = chromeBinary;
     }
 
     public WebDriver newDriver() {
@@ -60,6 +63,11 @@ public class SeleniumDriverFactory {
         // Resimleri engelle (2 = block) -> GB tasarrufu + hiz
         options.setExperimentalOption("prefs",
                 Map.of("profile.managed_default_content_settings.images", 2));
+
+        // Container'da Chromium yolu (lokalde bos -> Selenium Manager bulur)
+        if (chromeBinary != null && !chromeBinary.isBlank()) {
+            options.setBinary(chromeBinary);
+        }
 
         // IPRoyal proxy (varsa). Auth'lu ise relay uzerinden, degilse dogrudan.
         if (proxyHost != null && !proxyHost.isBlank() && proxyPort > 0) {

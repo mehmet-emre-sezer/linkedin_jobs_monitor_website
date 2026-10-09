@@ -11,7 +11,7 @@ class LinkedInScraperIT {
     @Test
     void linkedin_gercek_tarama() {
         LinkedInScraper scraper = new LinkedInScraper(
-                new SeleniumDriverFactory(new ProxyRelay(), "", 0, "", ""));
+                new SeleniumDriverFactory(new ProxyRelay(), "", 0, "", "", ""));
 
         List<ScrapedJob> jobs = scraper.scrapeJobs(
                 List.of("Junior Python Developer"),

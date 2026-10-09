@@ -9,7 +9,7 @@ class SeleniumDriverFactoryIT {
 
     @Test
     void headless_chrome_sayfa_acabiliyor() {
-        SeleniumDriverFactory factory = new SeleniumDriverFactory(new ProxyRelay(), "", 0, "", "");
+        SeleniumDriverFactory factory = new SeleniumDriverFactory(new ProxyRelay(), "", 0, "", "", "");
         WebDriver driver = factory.newDriver();
         try {
             driver.get("https://example.com");
