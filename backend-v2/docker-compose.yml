@@ -1,0 +1,36 @@
+# İş Pusulası — EC2 deploy. nginx + HTTPS host'ta (apt + certbot) kurulur,
+# burada sadece Spring app + Postgres container olarak döner.
+# Secret'lar .env dosyasından gelir (git'e girmez; .env.example'ı kopyala).
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Container içinde Postgres'e servis adıyla erişilir (localhost değil)
+      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Sadece host'a aç — nginx (host'ta) buradan proxy'ler, dışarıya 8080 açık değil
+    ports:
+      - "127.0.0.1:8080:8080"
+
+volumes:
+  pgdata:

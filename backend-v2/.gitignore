@@ -34,3 +34,4 @@ build/
 
 ### Local secrets (git'e girmez) ###
 **/application-local.properties
+.env
