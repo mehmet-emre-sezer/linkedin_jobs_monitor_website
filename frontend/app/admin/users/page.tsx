@@ -13,7 +13,7 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     api
-      .get<AdminUserItemResponse[]>("/admin/users")
+      .get<AdminUserItemResponse[]>("/api/admin/users")
       .then((res) => setUsers(res.data.map(adaptUser)))
       .catch((err) => setError(extractErrorMessage(err)))
       .finally(() => setIsLoading(false))

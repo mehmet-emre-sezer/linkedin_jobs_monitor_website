@@ -13,7 +13,7 @@ export default function AdminErrorsPage() {
 
   useEffect(() => {
     api
-      .get<AdminErrorLogResponse[]>("/admin/errors")
+      .get<AdminErrorLogResponse[]>("/api/admin/errors")
       .then((res) => setLogs(res.data.map(adaptErrorLog)))
       .catch((err) => setError(extractErrorMessage(err)))
       .finally(() => setIsLoading(false))

@@ -27,7 +27,7 @@ export default function UserDetailPage() {
 
   useEffect(() => {
     api
-      .get<AdminUserDetailResponse>(`/admin/users/${id}`)
+      .get<AdminUserDetailResponse>(`/api/admin/users/${id}`)
       .then((res) => setDetail(adaptUserDetail(res.data)))
       .catch((err) => setError(extractErrorMessage(err)))
       .finally(() => setIsLoading(false))
