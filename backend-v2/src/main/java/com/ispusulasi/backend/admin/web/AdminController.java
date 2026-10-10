@@ -25,6 +25,12 @@ public class AdminController {
         return adminService.getOverview();
     }
 
+    @GetMapping("/funnel")
+    public List<FunnelStep> funnel(Authentication authentication) {
+        adminService.requireAdmin(authentication.getName());
+        return adminService.getFunnel();
+    }
+
     @GetMapping("/users")
     public List<AdminUserItem> users(Authentication authentication) {
         adminService.requireAdmin(authentication.getName());

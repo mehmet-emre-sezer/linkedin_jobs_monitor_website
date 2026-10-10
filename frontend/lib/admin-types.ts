@@ -7,23 +7,25 @@ import type { AdminOverview, FunnelStep, User, ErrorLog } from "@/constants/mock
 
 export interface AdminOverviewResponse {
   totalUsers: number
-  active_users: number
-  registered_today: number
-  errors_last_24h: number
+  activeUsers: number
+  registeredToday: number
+  errorsLast24h: number
 }
 
 export interface FunnelStepResponse {
   label: string
-  user_count: number
+  userCount: number
 }
 
 export interface AdminUserItemResponse {
   id: number
-  name: string | null
   email: string
-  registered_at: string
-  last_seen_at: string
-  subscription: string
+  name: string | null
+  emailVerified: boolean
+  admin: boolean
+  createdAt: string
+  lastSeenAt: string
+  hasProfile: boolean
   telegramConnected: boolean
 }
 
@@ -84,14 +86,14 @@ function toSubscription(value: string): "free" | "paid" {
 export function adaptOverview(r: AdminOverviewResponse): AdminOverview {
   return {
     totalUsers: r.totalUsers,
-    activeUsers: r.active_users,
-    registeredToday: r.registered_today,
-    errorsLast24h: r.errors_last_24h,
+    activeUsers: r.activeUsers,
+    registeredToday: r.registeredToday,
+    errorsLast24h: r.errorsLast24h,
   }
 }
 
 export function adaptFunnel(rows: FunnelStepResponse[]): FunnelStep[] {
-  return rows.map((r) => ({ label: r.label, userCount: r.user_count }))
+  return rows.map((r) => ({ label: r.label, userCount: r.userCount }))
 }
 
 export function adaptUser(r: AdminUserItemResponse): User {
@@ -99,9 +101,9 @@ export function adaptUser(r: AdminUserItemResponse): User {
     id: String(r.id),
     name: r.name ?? r.email, // ismi olmayan kullanıcı için email'i göster
     email: r.email,
-    registeredAt: isoToDate(r.registered_at),
-    lastSeenAt: isoToDate(r.last_seen_at),
-    subscription: toSubscription(r.subscription),
+    registeredAt: isoToDate(r.createdAt),
+    lastSeenAt: isoToDate(r.lastSeenAt),
+    subscription: "free", // abonelik özelliği eklenene kadar (adım 3)
     isTelegramConnected: r.telegramConnected,
   }
 }

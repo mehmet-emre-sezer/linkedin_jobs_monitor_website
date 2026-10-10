@@ -2,6 +2,7 @@ package com.ispusulasi.backend.admin;
 
 import com.ispusulasi.backend.admin.web.AdminOverview;
 import com.ispusulasi.backend.admin.web.AdminUserItem;
+import com.ispusulasi.backend.admin.web.FunnelStep;
 import com.ispusulasi.backend.common.error.ForbiddenException;
 import com.ispusulasi.backend.common.error.NotFoundException;
 import com.ispusulasi.backend.job.JobRepository;
@@ -15,6 +16,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -47,12 +50,30 @@ public class AdminService {
         }
     }
 
+    /** Aktif sayilmak icin kullanicinin son gorulme suresi (gun). */
+    private static final int ACTIVE_WINDOW_DAYS = 7;
+
     public AdminOverview getOverview() {
+        long activeUsers = userRepository.countByLastSeenAtAfter(
+                LocalDateTime.now().minusDays(ACTIVE_WINDOW_DAYS));
+        long registeredToday = userRepository.countByCreatedAtAfter(
+                LocalDate.now().atStartOfDay());
+        // errorsLast24h: hata loglama altyapisi eklenince doldurulacak (su an 0).
+        long errorsLast24h = 0;
         return new AdminOverview(
                 userRepository.count(),
-                userRepository.countByEmailVerifiedTrue(),
-                jobRepository.count(),
-                scanRunRepository.count());
+                activeUsers,
+                registeredToday,
+                errorsLast24h);
+    }
+
+    /** Kayit -> dogrulama -> onboarding -> Telegram donusum hunisi. */
+    public List<FunnelStep> getFunnel() {
+        return List.of(
+                new FunnelStep("Kayıt oldu", userRepository.count()),
+                new FunnelStep("E-posta doğruladı", userRepository.countByEmailVerifiedTrue()),
+                new FunnelStep("Onboarding bitirdi", profileRepository.countByOnboardingCompletedTrue()),
+                new FunnelStep("Telegram bağladı", profileRepository.countByTelegramChatIdIsNotNull()));
     }
 
     public List<AdminUserItem> listUsers() {
@@ -76,8 +97,9 @@ public class AdminService {
         boolean telegramConnected = profile != null
                 && profile.getTelegramChatId() != null
                 && !profile.getTelegramChatId().isBlank();
+        String name = profile != null ? profile.getName() : null;
         return new AdminUserItem(
-                user.getId(), user.getEmail(), user.isEmailVerified(), user.isAdmin(),
-                user.getCreatedAt(), profile != null, telegramConnected);
+                user.getId(), user.getEmail(), name, user.isEmailVerified(), user.isAdmin(),
+                user.getCreatedAt(), user.getLastSeenAt(), profile != null, telegramConnected);
     }
 }

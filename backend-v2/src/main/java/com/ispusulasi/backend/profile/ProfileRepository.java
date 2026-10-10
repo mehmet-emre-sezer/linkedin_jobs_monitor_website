@@ -11,6 +11,12 @@ public interface ProfileRepository extends JpaRepository<Profile, Integer> {
 
     Optional<Profile> findByTelegramLinkToken(String telegramLinkToken);
 
+    /** Onboarding'i tamamlayan kullanici sayisi (funnel). */
+    long countByOnboardingCompletedTrue();
+
+    /** Telegram'ini baglayan kullanici sayisi (funnel). */
+    long countByTelegramChatIdIsNotNull();
+
     /** Taranabilir kullanicilar: email dogrulanmis + admin degil + Telegram bagli. */
     @Query("""
             SELECT p.userId FROM Profile p, User u
