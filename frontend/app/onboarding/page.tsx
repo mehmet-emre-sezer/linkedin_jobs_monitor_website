@@ -215,13 +215,13 @@ function StepCv({ cvFile, setCvFile, onUploaded, onError }: StepCvProps) {
     try {
       const form = new FormData()
       form.append("file", file)
-      const { data } = await api.post<ProfileResponse>("/profile/me/cv", form, {
+      const { data } = await api.post<ProfileResponse>("/api/profile/cv", form, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       const parsedView: ParsedCv = {
         name:           data.name           ?? "",
         university:     data.university     ?? "",
-        gradYear:       data.graduation_year ? String(data.graduation_year) : "",
+        gradYear:       data.graduationYear ? String(data.graduationYear) : "",
         skills:         data.skills,
       }
       setParsed(parsedView)
@@ -269,7 +269,7 @@ function StepTelegram({ isLinked, onLinked, onError }: StepTelegramProps) {
 
   // Backend'den deep link al
   useEffect(() => {
-    api.post<{ url: string }>("/profile/me/telegram-link")
+    api.post<{ url: string }>("/api/profile/me/telegram-link")
       .then(({ data }) => setBotUrl(data.url))
       .catch((err) => onError(extractErrorMessage(err)))
       .finally(() => setIsFetchingLink(false))
@@ -280,8 +280,8 @@ function StepTelegram({ isLinked, onLinked, onError }: StepTelegramProps) {
     if (isLinked) return
     const interval = setInterval(async () => {
       try {
-        const { data } = await api.get<ProfileResponse>("/profile/me")
-        if (data.telegram_chat_id) {
+        const { data } = await api.get<ProfileResponse>("/api/profile/me")
+        if (data.telegramChatId) {
           onLinked()
         }
       } catch { /* sessiz geç, bir sonraki tick'te tekrar dener */ }
@@ -397,7 +397,7 @@ function OnboardingPageContent() {
 
   // Mevcut profili çek, alanları pre-fill et
   useEffect(() => {
-    api.get<ProfileResponse>("/profile/me")
+    api.get<ProfileResponse>("/api/profile/me")
       .then(({ data }) => {
         applyProfileToState(data)
       })
@@ -409,17 +409,17 @@ function OnboardingPageContent() {
     setProfileInfo({
       name:       profile.name ?? "",
       university: profile.university ?? "",
-      gradYear:   profile.graduation_year ? String(profile.graduation_year) : "",
+      gradYear:   profile.graduationYear ? String(profile.graduationYear) : "",
     })
     setSkills(profile.skills ?? [])
     setPrefs({
-      locations: profile.search_locations ?? [],
-      workMode:  profile.work_mode || "any",
-      roles:     profile.target_roles ?? [],
-      levels:    profile.target_levels ?? [],
+      locations: profile.searchLocations ?? [],
+      workMode:  profile.workMode || "any",
+      roles:     profile.targetRoles ?? [],
+      levels:    profile.targetLevels ?? [],
     })
-    setHasCvOnServer(!!profile.cv_filename)
-    setIsTelegramLinked(!!profile.telegram_chat_id)
+    setHasCvOnServer(!!profile.cvFilename)
+    setIsTelegramLinked(!!profile.telegramChatId)
   }
 
   function updateProfileInfo(key: keyof ProfileInfo, val: string) {
@@ -439,19 +439,19 @@ function OnboardingPageContent() {
     setIsSaving(true)
     try {
       if (step === 1) {
-        await api.put("/profile/me/basic", {
+        await api.put("/api/profile/me", {
           name: profileInfo.name.trim(),
           university: profileInfo.university.trim(),
-          graduation_year: Number(profileInfo.gradYear),
+          graduationYear: Number(profileInfo.gradYear),
         })
       } else if (step === 2) {
-        await api.put("/profile/me/skills", { skills })
+        await api.put("/api/profile/me", { skills })
       } else if (step === 3) {
-        await api.put("/profile/me/search-preferences", {
-          search_locations: prefs.locations,
-          work_mode: prefs.workMode,
-          target_roles: prefs.roles,
-          target_levels: prefs.levels,
+        await api.put("/api/profile/me", {
+          searchLocations: prefs.locations,
+          workMode: prefs.workMode,
+          targetRoles: prefs.roles,
+          targetLevels: prefs.levels,
         })
       }
       // Adım 3 ve 4 ek API çağrısı yapmıyor:
@@ -461,7 +461,7 @@ function OnboardingPageContent() {
       if (step < TOTAL_STEPS) {
         setStep((s) => s + 1)
       } else {
-        await api.post("/profile/me/complete-onboarding")
+        await api.post("/api/profile/me/complete-onboarding")
         router.push("/dashboard")
       }
     } catch (err) {

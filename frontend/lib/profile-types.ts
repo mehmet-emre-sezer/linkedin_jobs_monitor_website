@@ -1,30 +1,30 @@
 export interface ProfileResponse {
   name: string | null
   university: string | null
-  graduation_year: number | null
+  graduationYear: number | null
   skills: string[]
-  cv_filename: string | null
+  cvFilename: string | null
   cv_uploaded_at: string | null
-  telegram_chat_id: string | null
-  onboarding_completed: boolean
-  search_locations: string[]
-  work_mode: string
-  target_roles: string[]
-  target_levels: string[]
-  updated_at: string
+  telegramChatId: string | null
+  onboardingCompleted: boolean
+  searchLocations: string[]
+  workMode: string
+  targetRoles: string[]
+  targetLevels: string[]
+  updatedAt: string
 }
 
 export interface SearchPreferencesUpdate {
-  search_locations: string[]
-  work_mode: string
-  target_roles: string[]
-  target_levels: string[]
+  searchLocations: string[]
+  workMode: string
+  targetRoles: string[]
+  targetLevels: string[]
 }
 
 export interface ProfileBasicUpdate {
   name: string
   university: string
-  graduation_year: number
+  graduationYear: number
 }
 
 export interface SkillsUpdate {

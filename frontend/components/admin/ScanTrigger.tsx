@@ -7,7 +7,7 @@ import type { User } from "@/constants/mockData"
 
 /**
  * Admin manuel tarama testi: dropdown'dan kullanıcı seç → Test et → tarama kuyruğa atılır.
- * (Beat'i beklemeden; POST /admin/scan/:id)
+ * (Beat'i beklemeden; POST /api/admin/scan/:id)
  */
 export default function ScanTrigger() {
   const [users, setUsers] = useState<User[]>([])
@@ -18,7 +18,7 @@ export default function ScanTrigger() {
 
   useEffect(() => {
     api
-      .get<AdminUserItemResponse[]>("/admin/users")
+      .get<AdminUserItemResponse[]>("/api/admin/users")
       .then((res) => {
         const list = res.data.map(adaptUser)
         setUsers(list)
@@ -33,7 +33,7 @@ export default function ScanTrigger() {
     setResult("")
     setIsRunning(true)
     try {
-      const { data } = await api.post<{ task_id: string }>(`/admin/scan/${selectedId}`)
+      const { data } = await api.post<{ task_id: string }>(`/api/admin/scan/${selectedId}`)
       setResult(`Tarama kuyruğa atıldı (task ${data.task_id.slice(0, 8)}…). Worker loglarını izle.`)
     } catch (err) {
       setError(extractErrorMessage(err))

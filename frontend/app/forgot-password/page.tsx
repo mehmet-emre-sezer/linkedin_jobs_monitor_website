@@ -17,7 +17,7 @@ export default function ForgotPasswordPage() {
     setError("")
     setLoading(true)
     try {
-      await api.post("/auth/forgot-password", { email })
+      await api.post("/api/auth/forgot-password", { email })
       setSubmitted(true)
     } catch (err) {
       setError(extractErrorMessage(err))

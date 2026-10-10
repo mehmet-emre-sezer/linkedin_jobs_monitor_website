@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function refresh() {
     try {
-      const response = await api.get<AuthUser>("/auth/me")
+      const response = await api.get<AuthUser>("/api/users/me")
       setUser(response.data)
     } catch {
       clearToken()
@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   function login(response: TokenResponse) {
-    setToken(response.access_token)
+    setToken(response.token)
     setUser(response.user)
   }
 

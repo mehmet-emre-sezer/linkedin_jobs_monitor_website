@@ -52,7 +52,7 @@ export default function RegisterPage() {
     setError("")
     setLoading(true)
     try {
-      await api.post("/auth/register", { email, password })
+      await api.post("/api/auth/register", { email, password })
       setSubmitted(true)
     } catch (err) {
       setError(extractErrorMessage(err))

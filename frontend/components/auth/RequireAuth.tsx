@@ -18,12 +18,12 @@ export default function RequireAuth({ children }: { children: React.ReactNode })
     if (isLoading) return
     if (!user) {
       router.replace("/login")
-    } else if (!user.is_email_verified) {
+    } else if (!user.emailVerified) {
       router.replace("/verify-email")
     }
   }, [isLoading, user, router])
 
-  if (isLoading || !user || !user.is_email_verified) {
+  if (isLoading || !user || !user.emailVerified) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0f1117] text-gray-400">
         Yükleniyor…

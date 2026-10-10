@@ -29,8 +29,8 @@ function SettingsPageContent() {
 
   useEffect(() => {
     api
-      .get<ProfileResponse>("/profile/me")
-      .then((res) => setIsTelegramConnected(Boolean(res.data.telegram_chat_id)))
+      .get<ProfileResponse>("/api/profile/me")
+      .then((res) => setIsTelegramConnected(Boolean(res.data.telegramChatId)))
       .catch(() => undefined)
   }, [])
 
@@ -51,8 +51,8 @@ function SettingsPageContent() {
         {user && (
           <AccountSection
             email={user.email}
-            createdAt={user.created_at}
-            isVerified={user.is_email_verified}
+            createdAt={user.createdAt}
+            isVerified={user.emailVerified}
           />
         )}
         <TelegramSection isConnected={isTelegramConnected} />
@@ -100,7 +100,7 @@ function AccountSection({
     setIsSent(false)
     setIsSending(true)
     try {
-      await api.post("/auth/resend-verification", { email })
+      await api.post("/api/auth/resend-verification", { email })
       setIsSent(true)
     } catch (err) {
       setError(extractErrorMessage(err))
@@ -150,7 +150,7 @@ function TelegramSection({ isConnected }: { isConnected: boolean }) {
     setError("")
     setIsLinking(true)
     try {
-      const { data } = await api.post<{ url: string }>("/profile/me/telegram-link")
+      const { data } = await api.post<{ url: string }>("/api/profile/me/telegram-link")
       if (isMobile) {
         window.location.href = data.url
       } else {
@@ -194,7 +194,7 @@ function DangerSection({ onDeleted }: { onDeleted: () => void }) {
     setError("")
     setIsDeleting(true)
     try {
-      await api.delete("/auth/me")
+      await api.delete("/api/users/me")
       onDeleted()
     } catch (err) {
       setError(extractErrorMessage(err))

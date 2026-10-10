@@ -6,7 +6,7 @@ import type { AdminOverview, FunnelStep, User, ErrorLog } from "@/constants/mock
 // ── Backend response tipleri ───────────────────────────────────
 
 export interface AdminOverviewResponse {
-  total_users: number
+  totalUsers: number
   active_users: number
   registered_today: number
   errors_last_24h: number
@@ -24,7 +24,7 @@ export interface AdminUserItemResponse {
   registered_at: string
   last_seen_at: string
   subscription: string
-  is_telegram_connected: boolean
+  telegramConnected: boolean
 }
 
 export interface AdminUserDetailResponse {
@@ -35,12 +35,12 @@ export interface AdminUserDetailResponse {
   last_seen_at: string
   subscription: string
   university: string | null
-  graduation_year: number | null
+  graduationYear: number | null
   skills: string[]
-  telegram_chat_id: string | null
-  total_jobs_scanned: number
-  total_jobs_sent: number
-  average_score: number
+  telegramChatId: string | null
+  totalJobs_scanned: number
+  totalJobs_sent: number
+  averageScore: number
 }
 
 export interface AdminErrorLogResponse {
@@ -48,7 +48,7 @@ export interface AdminErrorLogResponse {
   timestamp: string
   severity: string
   source: string
-  user_id: number | null
+  userId: number | null
   message: string
   stack_trace: string | null
 }
@@ -83,7 +83,7 @@ function toSubscription(value: string): "free" | "paid" {
 
 export function adaptOverview(r: AdminOverviewResponse): AdminOverview {
   return {
-    totalUsers: r.total_users,
+    totalUsers: r.totalUsers,
     activeUsers: r.active_users,
     registeredToday: r.registered_today,
     errorsLast24h: r.errors_last_24h,
@@ -102,7 +102,7 @@ export function adaptUser(r: AdminUserItemResponse): User {
     registeredAt: isoToDate(r.registered_at),
     lastSeenAt: isoToDate(r.last_seen_at),
     subscription: toSubscription(r.subscription),
-    isTelegramConnected: r.is_telegram_connected,
+    isTelegramConnected: r.telegramConnected,
   }
 }
 
@@ -114,14 +114,14 @@ export function adaptUserDetail(r: AdminUserDetailResponse): UserDetailView {
     subscription: toSubscription(r.subscription),
     registeredAt: isoToDate(r.registered_at),
     lastSeenAt: isoToDate(r.last_seen_at),
-    isTelegramConnected: r.telegram_chat_id != null,
+    isTelegramConnected: r.telegramChatId != null,
     university: r.university,
-    graduationYear: r.graduation_year,
+    graduationYear: r.graduationYear,
     skills: r.skills,
-    chatId: r.telegram_chat_id,
-    totalJobsScanned: r.total_jobs_scanned,
-    totalJobsSent: r.total_jobs_sent,
-    averageScore: r.average_score,
+    chatId: r.telegramChatId,
+    totalJobsScanned: r.totalJobs_scanned,
+    totalJobsSent: r.totalJobs_sent,
+    averageScore: r.averageScore,
   }
 }
 
@@ -131,7 +131,7 @@ export function adaptErrorLog(r: AdminErrorLogResponse): ErrorLog {
     timestamp: r.timestamp.replace("T", " ").slice(0, 19),
     severity: r.severity as ErrorLog["severity"],
     source: r.source as ErrorLog["source"],
-    userId: r.user_id != null ? String(r.user_id) : null,
+    userId: r.userId != null ? String(r.userId) : null,
     message: r.message,
     stackTrace: r.stack_trace ?? "",
   }

@@ -1,12 +1,12 @@
 // Backend (FastAPI) dashboard endpoint response tipleri — snake_case.
 
 export interface BackendDashboardSummary {
-  scanned_this_week: number
-  sent_this_week: number
-  average_score: number
-  max_score: number
-  next_scan_at: string
-  is_telegram_connected: boolean
+  scannedThisWeek: number
+  sentThisWeek: number
+  averageScore: number
+  maxScore: number
+  nextScanAt: string
+  telegramConnected: boolean
 }
 
 export interface BackendJobItem {
@@ -15,16 +15,16 @@ export interface BackendJobItem {
   company: string
   location: string
   score: number
-  posted_at: string | null
+  postedAt: string | null
   applicants: number | null
   summary: string | null
-  matched_keywords: string[]
+  matchedKeywords: string[]
   url: string
-  created_at: string
+  createdAt: string
 }
 
 export interface BackendQueryStat {
   query: string
-  job_count: number
-  average_score: number
+  jobCount: number
+  averageScore: number
 }

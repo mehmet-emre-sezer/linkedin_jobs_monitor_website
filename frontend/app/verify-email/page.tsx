@@ -32,7 +32,7 @@ function VerifyEmailContent() {
   // Token ile doğrulama
   useEffect(() => {
     if (!token) return
-    api.post("/auth/verify-email", { token })
+    api.post("/api/auth/verify-email", { token })
       .then(async () => {
         setStatus("success")
         await refresh()
@@ -45,7 +45,7 @@ function VerifyEmailContent() {
 
   // Token yok + zaten doğrulanmış → devam et
   useEffect(() => {
-    if (!token && !isLoading && user?.is_email_verified) {
+    if (!token && !isLoading && user?.emailVerified) {
       router.replace("/onboarding")
     }
   }, [token, isLoading, user, router])
@@ -56,7 +56,7 @@ function VerifyEmailContent() {
     setIsResent(false)
     setIsResending(true)
     try {
-      await api.post("/auth/resend-verification", { email: user.email })
+      await api.post("/api/auth/resend-verification", { email: user.email })
       setIsResent(true)
     } catch (err) {
       setErrorMessage(extractErrorMessage(err))

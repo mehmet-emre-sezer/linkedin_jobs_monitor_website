@@ -30,11 +30,11 @@ export default function LoginPage() {
     setError("")
     setLoading(true)
     try {
-      const { data } = await api.post<TokenResponse>("/auth/login", { email, password })
+      const { data } = await api.post<TokenResponse>("/api/auth/login", { email, password })
       login(data)
 
       // Admin → direkt panel (onboarding akışına girmez).
-      // is_admin backend'den geliyor; gerçek güvenlik require_admin + AdminGuard'da.
+      // admin backend'den geliyor; gerçek güvenlik require_admin + AdminGuard'da.
       router.push(await resolvePostLoginPath(data.user))
     } catch (err) {
       setError(extractErrorMessage(err))

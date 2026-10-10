@@ -60,8 +60,8 @@ export default function GoogleButton({ onError }: Props) {
 
     setIsLoading(true)
     try {
-      const { data } = await api.post<TokenResponse>("/auth/google", {
-        id_token: response.credential,
+      const { data } = await api.post<TokenResponse>("/api/auth/google", {
+        idToken: response.credential,
       })
       login(data)
       router.push(await resolvePostLoginPath(data.user))

@@ -7,19 +7,19 @@ import type { ProfileResponse } from "@/lib/profile-types"
  *
  * Parola girişi ve Google girişi bu mantığı paylaşır — ayrı ayrı yazıldığında
  * birbirinden kaymıştı (Google kullanıcıları onboarding'i atlıyordu, çünkü
- * `is_email_verified` Google'dan hep true geliyor).
+ * `emailVerified` Google'dan hep true geliyor).
  */
 export async function resolvePostLoginPath(user: AuthUser): Promise<string> {
-  if (user.is_admin) return "/admin"
+  if (user.admin) return "/admin"
 
   // Sert kapı: e-posta doğrulanmamışsa başka hiçbir yere gidilmez.
-  if (!user.is_email_verified) return "/verify-email"
+  if (!user.emailVerified) return "/verify-email"
 
   // Onboarding'i bitirmeyen kullanıcı dashboard'a alınmaz: arama tercihi
   // girmediyse hiç sorgusu olmaz, yani ürün onun için çalışmaz.
   try {
-    const { data: profile } = await api.get<ProfileResponse>("/profile/me")
-    return profile.onboarding_completed ? "/dashboard" : "/onboarding"
+    const { data: profile } = await api.get<ProfileResponse>("/api/profile/me")
+    return profile.onboardingCompleted ? "/dashboard" : "/onboarding"
   } catch {
     // Profil çekilemedi — onboarding'e göndermek güvenli taraf.
     return "/onboarding"

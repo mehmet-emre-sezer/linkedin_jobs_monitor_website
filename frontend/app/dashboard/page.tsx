@@ -25,10 +25,10 @@ function adaptJob(b: BackendJobItem): Job {
     company: b.company,
     location: b.location,
     score: b.score,
-    postedAt: b.posted_at ?? "",
+    postedAt: b.postedAt ?? "",
     applicants: b.applicants ?? 0,
     description: b.summary ?? "",
-    matchedKeywords: b.matched_keywords,
+    matchedKeywords: b.matchedKeywords,
     url: b.url,
   }
 }
@@ -36,8 +36,8 @@ function adaptJob(b: BackendJobItem): Job {
 function adaptQueryStat(b: BackendQueryStat): QueryStat {
   return {
     query: b.query,
-    jobCount: b.job_count,
-    averageScore: b.average_score,
+    jobCount: b.jobCount,
+    averageScore: b.averageScore,
   }
 }
 
@@ -61,9 +61,9 @@ function DashboardPageContent() {
 
   useEffect(() => {
     Promise.all([
-      api.get<BackendDashboardSummary>("/dashboard/summary"),
-      api.get<BackendJobItem[]>("/dashboard/jobs"),
-      api.get<BackendQueryStat[]>("/dashboard/query-stats"),
+      api.get<BackendDashboardSummary>("/api/dashboard/summary"),
+      api.get<BackendJobItem[]>("/api/jobs"),
+      api.get<BackendQueryStat[]>("/api/dashboard/query-stats"),
     ])
       .then(([s, j, q]) => {
         setSummary(s.data)
@@ -115,16 +115,16 @@ function DashboardPageContent() {
 
         {/* Sistem durumu */}
         <StatusBanner
-          nextScanAt={summary.next_scan_at}
-          isTelegramConnected={summary.is_telegram_connected}
+          nextScanAt={summary.nextScanAt}
+          isTelegramConnected={summary.telegramConnected}
         />
 
         {/* Metrik kartlar */}
         <StatCards
-          scanned={summary.scanned_this_week}
-          sent={summary.sent_this_week}
-          averageScore={summary.average_score}
-          maxScore={summary.max_score}
+          scanned={summary.scannedThisWeek}
+          sent={summary.sentThisWeek}
+          averageScore={summary.averageScore}
+          maxScore={summary.maxScore}
         />
 
         {/* Liste + Sorgu performansı */}

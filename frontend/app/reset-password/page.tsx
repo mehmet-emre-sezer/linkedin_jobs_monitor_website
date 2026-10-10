@@ -46,7 +46,7 @@ function ResetPasswordContent() {
     setError("")
     setLoading(true)
     try {
-      await api.post("/auth/reset-password", { token, new_password: password })
+      await api.post("/api/auth/reset-password", { token, new_password: password })
       setSuccess(true)
       setTimeout(() => router.push("/login"), 2000)
     } catch (err) {

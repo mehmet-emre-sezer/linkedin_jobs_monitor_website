@@ -34,7 +34,7 @@ function ProfilePageContent() {
 
   useEffect(() => {
     api
-      .get<ProfileResponse>("/profile/me")
+      .get<ProfileResponse>("/api/profile/me")
       .then((res) => setProfile(res.data))
       .catch((err) => setError(extractErrorMessage(err)))
       .finally(() => setIsLoading(false))
@@ -127,7 +127,7 @@ function BasicInfoSection({
   const [name, setName] = useState(profile.name ?? "")
   const [university, setUniversity] = useState(profile.university ?? "")
   const [gradYear, setGradYear] = useState(
-    profile.graduation_year ? String(profile.graduation_year) : "",
+    profile.graduationYear ? String(profile.graduationYear) : "",
   )
   const [isSaving, setIsSaving] = useState(false)
   const [isSaved, setIsSaved] = useState(false)
@@ -147,10 +147,10 @@ function BasicInfoSection({
     setIsSaved(false)
     setIsSaving(true)
     try {
-      const { data } = await api.put<ProfileResponse>("/profile/me/basic", {
+      const { data } = await api.put<ProfileResponse>("/api/profile/me", {
         name: name.trim(),
         university: university.trim(),
-        graduation_year: yearNum,
+        graduationYear: yearNum,
       })
       onUpdated(data)
       setIsSaved(true)
@@ -212,7 +212,7 @@ function SkillsSection({
     setIsSaved(false)
     setIsSaving(true)
     try {
-      const { data } = await api.put<ProfileResponse>("/profile/me/skills", { skills })
+      const { data } = await api.put<ProfileResponse>("/api/profile/me", { skills })
       onUpdated(data)
       setSkills(data.skills ?? [])
       setIsSaved(true)
@@ -244,10 +244,10 @@ function SearchPreferencesSection({
   onUpdated: (p: ProfileResponse) => void
 }) {
   const [prefs, setPrefs] = useState<SearchPreferences>({
-    locations: profile.search_locations ?? [],
-    workMode: profile.work_mode || "any",
-    roles: profile.target_roles ?? [],
-    levels: profile.target_levels ?? [],
+    locations: profile.searchLocations ?? [],
+    workMode: profile.workMode || "any",
+    roles: profile.targetRoles ?? [],
+    levels: profile.targetLevels ?? [],
   })
   const [isSaving, setIsSaving] = useState(false)
   const [isSaved, setIsSaved] = useState(false)
@@ -259,11 +259,11 @@ function SearchPreferencesSection({
     setIsSaved(false)
     setIsSaving(true)
     try {
-      const { data } = await api.put<ProfileResponse>("/profile/me/search-preferences", {
-        search_locations: prefs.locations,
-        work_mode: prefs.workMode,
-        target_roles: prefs.roles,
-        target_levels: prefs.levels,
+      const { data } = await api.put<ProfileResponse>("/api/profile/me", {
+        searchLocations: prefs.locations,
+        workMode: prefs.workMode,
+        targetRoles: prefs.roles,
+        targetLevels: prefs.levels,
       })
       onUpdated(data)
       setIsSaved(true)
@@ -307,7 +307,7 @@ function CvSection({
     try {
       const form = new FormData()
       form.append("file", file)
-      const { data } = await api.post<ProfileResponse>("/profile/me/cv", form, {
+      const { data } = await api.post<ProfileResponse>("/api/profile/cv", form, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       onUpdated(data)
@@ -321,10 +321,10 @@ function CvSection({
 
   return (
     <SectionCard title="CV" description="PDF, DOC veya DOCX. Yeni yükleme eksik profil alanlarını doldurur.">
-      {profile.cv_filename ? (
+      {profile.cvFilename ? (
         <div className="flex items-center justify-between bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 mb-4">
           <div className="min-w-0">
-            <div className="text-white text-sm font-medium truncate">{profile.cv_filename}</div>
+            <div className="text-white text-sm font-medium truncate">{profile.cvFilename}</div>
             <div className="text-gray-600 text-xs">Yüklü</div>
           </div>
           <span className="text-green-400 text-xs shrink-0">● Mevcut</span>
@@ -350,7 +350,7 @@ function TelegramSection({ profile }: { profile: ProfileResponse }) {
   const [error, setError] = useState("")
   const [linkUrl, setLinkUrl] = useState("")
   const isMobile = useIsMobile()
-  const isConnected = Boolean(profile.telegram_chat_id)
+  const isConnected = Boolean(profile.telegramChatId)
 
   // Mobilde Telegram kurulu olduğu için doğrudan açıyoruz. Masaüstünde
   // uygulama olmayabilir; orada QR + kopyalanabilir link gösteriyoruz.
@@ -358,7 +358,7 @@ function TelegramSection({ profile }: { profile: ProfileResponse }) {
     setError("")
     setIsLinking(true)
     try {
-      const { data } = await api.post<{ url: string }>("/profile/me/telegram-link")
+      const { data } = await api.post<{ url: string }>("/api/profile/me/telegram-link")
       if (isMobile) {
         window.location.href = data.url
       } else {

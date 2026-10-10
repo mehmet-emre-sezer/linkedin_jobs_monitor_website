@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 
 /**
- * /admin alt ağacını korur: yalnızca is_admin kullanıcılar paneli görür.
+ * /admin alt ağacını korur: yalnızca admin kullanıcılar paneli görür.
  * Giriş yoksa /login'e, admin değilse anasayfaya yönlendirir.
  *
  * Not: Bu istemci tarafı bir UX korumasıdır. Gerçek güvenlik backend'de
@@ -15,13 +15,13 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
   const { user, isLoading } = useAuth()
   const router = useRouter()
 
-  const isAuthorized = !isLoading && user?.is_admin === true
+  const isAuthorized = !isLoading && user?.admin === true
 
   useEffect(() => {
     if (isLoading) return
     if (!user) {
       router.replace("/login")
-    } else if (!user.is_admin) {
+    } else if (!user.admin) {
       router.replace("/")
     }
   }, [isLoading, user, router])

@@ -1,6 +1,6 @@
 import axios, { AxiosError } from "axios"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080"
 const TOKEN_KEY = "jobradar_token"
 
 // ── Token yönetimi ──────────────────────────────────────────────

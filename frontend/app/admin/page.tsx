@@ -21,8 +21,8 @@ export default function AdminHomePage() {
 
   useEffect(() => {
     Promise.all([
-      api.get<AdminOverviewResponse>("/admin/overview"),
-      api.get<FunnelStepResponse[]>("/admin/funnel"),
+      api.get<AdminOverviewResponse>("/api/admin/overview"),
+      api.get<FunnelStepResponse[]>("/api/admin/funnel"),
     ])
       .then(([overviewRes, funnelRes]) => {
         setOverview(adaptOverview(overviewRes.data))
