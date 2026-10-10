@@ -17,4 +17,10 @@ public interface JobRepository extends JpaRepository<Job, Integer> {
 
     @Query("SELECT COALESCE(MAX(j.score), 0) FROM Job j WHERE j.userId = :userId")
     int maxScore(@Param("userId") Integer userId);
+
+    /** Kullaniciya ait toplam eslesen ilan sayisi (admin detay). */
+    long countByUserId(Integer userId);
+
+    /** Kullaniciya gonderilen (Telegram) ilan sayisi (admin detay). */
+    long countByUserIdAndSentAtIsNotNull(Integer userId);
 }

@@ -37,6 +37,21 @@ public class AdminController {
         return adminService.listUsers();
     }
 
+    @GetMapping("/users/{userId}")
+    public AdminUserDetail userDetail(Authentication authentication, @PathVariable Integer userId) {
+        adminService.requireAdmin(authentication.getName());
+        if (!adminService.userExists(userId)) {
+            throw new NotFoundException("Kullanıcı bulunamadı: " + userId);
+        }
+        return adminService.getUserDetail(userId);
+    }
+
+    @GetMapping("/errors")
+    public List<AdminErrorLog> errors(Authentication authentication) {
+        adminService.requireAdmin(authentication.getName());
+        return adminService.getErrors();
+    }
+
     @PostMapping("/scan/{userId}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Map<String, Object> triggerScan(Authentication authentication, @PathVariable Integer userId) {

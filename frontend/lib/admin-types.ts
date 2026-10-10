@@ -25,6 +25,7 @@ export interface AdminUserItemResponse {
   admin: boolean
   createdAt: string
   lastSeenAt: string
+  subscription: string
   hasProfile: boolean
   telegramConnected: boolean
 }
@@ -33,15 +34,15 @@ export interface AdminUserDetailResponse {
   id: number
   email: string
   name: string | null
-  registered_at: string
-  last_seen_at: string
+  createdAt: string
+  lastSeenAt: string
   subscription: string
   university: string | null
   graduationYear: number | null
   skills: string[]
   telegramChatId: string | null
-  totalJobs_scanned: number
-  totalJobs_sent: number
+  totalJobsScanned: number
+  totalJobsSent: number
   averageScore: number
 }
 
@@ -52,7 +53,7 @@ export interface AdminErrorLogResponse {
   source: string
   userId: number | null
   message: string
-  stack_trace: string | null
+  stackTrace: string | null
 }
 
 // Detay sayfası için tek birleşik view tipi (hesap + profil + istatistik).
@@ -103,7 +104,7 @@ export function adaptUser(r: AdminUserItemResponse): User {
     email: r.email,
     registeredAt: isoToDate(r.createdAt),
     lastSeenAt: isoToDate(r.lastSeenAt),
-    subscription: "free", // abonelik özelliği eklenene kadar (adım 3)
+    subscription: toSubscription(r.subscription),
     isTelegramConnected: r.telegramConnected,
   }
 }
@@ -114,15 +115,15 @@ export function adaptUserDetail(r: AdminUserDetailResponse): UserDetailView {
     name: r.name ?? r.email,
     email: r.email,
     subscription: toSubscription(r.subscription),
-    registeredAt: isoToDate(r.registered_at),
-    lastSeenAt: isoToDate(r.last_seen_at),
+    registeredAt: isoToDate(r.createdAt),
+    lastSeenAt: isoToDate(r.lastSeenAt),
     isTelegramConnected: r.telegramChatId != null,
     university: r.university,
     graduationYear: r.graduationYear,
     skills: r.skills,
     chatId: r.telegramChatId,
-    totalJobsScanned: r.totalJobs_scanned,
-    totalJobsSent: r.totalJobs_sent,
+    totalJobsScanned: r.totalJobsScanned,
+    totalJobsSent: r.totalJobsSent,
     averageScore: r.averageScore,
   }
 }
@@ -135,6 +136,6 @@ export function adaptErrorLog(r: AdminErrorLogResponse): ErrorLog {
     source: r.source as ErrorLog["source"],
     userId: r.userId != null ? String(r.userId) : null,
     message: r.message,
-    stackTrace: r.stack_trace ?? "",
+    stackTrace: r.stackTrace ?? "",
   }
 }

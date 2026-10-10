@@ -1,5 +1,6 @@
 package com.ispusulasi.backend.scan;
 
+import com.ispusulasi.backend.errorlog.ErrorLogService;
 import com.ispusulasi.backend.job.Job;
 import com.ispusulasi.backend.job.JobRepository;
 import com.ispusulasi.backend.notification.NotificationService;
@@ -44,6 +45,7 @@ public class UserScanService {
     private final LinkedInScraper scraper;
     private final JobScoringService scoringService;
     private final NotificationService notificationService;
+    private final ErrorLogService errorLogService;
 
     private final int scoreThreshold;
     private final int jobsPerQuery;
@@ -55,6 +57,7 @@ public class UserScanService {
                            LinkedInScraper scraper,
                            JobScoringService scoringService,
                            NotificationService notificationService,
+                           ErrorLogService errorLogService,
                            @Value("${app.scan.score-threshold}") int scoreThreshold,
                            @Value("${app.scan.jobs-per-query}") int jobsPerQuery) {
         this.profileRepository = profileRepository;
@@ -64,6 +67,7 @@ public class UserScanService {
         this.scraper = scraper;
         this.scoringService = scoringService;
         this.notificationService = notificationService;
+        this.errorLogService = errorLogService;
         this.scoreThreshold = scoreThreshold;
         this.jobsPerQuery = jobsPerQuery;
     }
@@ -105,6 +109,8 @@ public class UserScanService {
 
         } catch (Exception e) {
             log.error("Tarama hatasi user_id={}: {}", userId, e.getMessage());
+            errorLogService.record("error", "scraper", userId,
+                    "Tarama hatası: " + e.getMessage(), e);
             finishRun(run, "failed", 0, 0, 0);
             throw new RuntimeException("Tarama sirasinda hata", e);
         }

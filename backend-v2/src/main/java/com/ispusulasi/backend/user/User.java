@@ -1,6 +1,7 @@
 package com.ispusulasi.backend.user;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.ColumnDefault;
 import java.time.LocalDateTime;
 
 @Entity
@@ -32,6 +33,12 @@ public class User {
     @Column(name = "google_id", unique = true)
     private String googleId;
 
+    // Abonelik: "free" | "paid". Odeme entegrasyonu yok, elle/ileride ayarlanir.
+    // @ColumnDefault: ddl-auto=update mevcut satirlara 'free' default'uyla sutun ekler.
+    @Column(name = "subscription", nullable = false)
+    @ColumnDefault("'free'")
+    private String subscription = "free";
+
     protected User() {} // JPA bunu zorunlu kılar
 
     // --- getter / setter ---
@@ -50,4 +57,6 @@ public class User {
     public void setLastSeenAt(LocalDateTime lastSeenAt) { this.lastSeenAt = lastSeenAt; }
     public String getGoogleId() { return googleId; }
     public void setGoogleId(String googleId) { this.googleId = googleId; }
+    public String getSubscription() { return subscription; }
+    public void setSubscription(String subscription) { this.subscription = subscription; }
 }

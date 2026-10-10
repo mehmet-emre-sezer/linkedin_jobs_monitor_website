@@ -10,6 +10,7 @@ public record AdminUserItem(
         boolean admin,
         LocalDateTime createdAt,
         LocalDateTime lastSeenAt,
+        String subscription,
         boolean hasProfile,
         boolean telegramConnected
 ) {}
