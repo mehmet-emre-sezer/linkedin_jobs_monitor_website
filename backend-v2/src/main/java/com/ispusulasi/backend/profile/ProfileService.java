@@ -134,8 +134,19 @@ public class ProfileService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("Kullanıcı bulunamadı: " + email));
 
+        // Profil henuz yoksa 404 yerine bos/varsayilan profil don: onboarding'e yeni
+        // giren kullanici 404 almasin. onboardingCompleted=false oldugundan frontend
+        // yine onboarding akisini surdurur. (Kaydedilmez; sadece okuma icin uretilir.)
         Profile profile = profileRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new NotFoundException("Bu kullanıcının profili yok"));
+                .orElseGet(() -> {
+                    Profile empty = new Profile();
+                    empty.setUserId(user.getId());
+                    empty.setOnboardingCompleted(false);
+                    empty.setWorkMode("any");
+                    empty.setCreatedAt(LocalDateTime.now());
+                    empty.setUpdatedAt(LocalDateTime.now());
+                    return empty;
+                });
 
         return toResponse(profile);
     }
