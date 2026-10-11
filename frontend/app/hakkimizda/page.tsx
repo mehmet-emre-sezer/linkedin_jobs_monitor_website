@@ -44,11 +44,7 @@ export default function AboutPage() {
           </a>
         </p>
         <p className="text-gray-500 text-xs">
-          Açık adres bilgisi{" "}
-          <a href="/mesafeli-satis" className="text-blue-400 hover:text-blue-300">
-            Mesafeli Satış Sözleşmesi
-          </a>
-          &apos;nde yer almaktadır.
+          Adres: {C.address}
         </p>
       </LegalSection>
 

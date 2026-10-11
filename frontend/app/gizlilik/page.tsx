@@ -115,7 +115,7 @@ export default function PrivacyPage() {
           </p>
           <ul className="list-disc pl-5 space-y-2">
             <li>
-              <strong className="text-gray-300">Groq (yapay zekâ):</strong> ilanların
+              <strong className="text-gray-300">Gemini (Google, yapay zekâ):</strong> ilanların
               sana uygunluğunu puanlamak için becerilerin, CV metnin ve ilan
               açıklaması bu servise gönderilir. CV yüklemezsen CV metni gönderilmez.
             </li>
@@ -128,14 +128,8 @@ export default function PrivacyPage() {
               sıfırlama e-postaları için e-posta adresin kullanılır.
             </li>
             <li>
-              <strong className="text-gray-300">iyzico:</strong> abonelik ödemeleri
-              iyzico altyapısı üzerinden alınır. Kart bilgilerin doğrudan iyzico&apos;ya
-              girilir; tarafımızca görülmez ve saklanmaz. Ödemeyi ilişkilendirmek için
-              ad, e-posta ve fatura bilgilerin iyzico ile paylaşılır.
-            </li>
-            <li>
-              <strong className="text-gray-300">Railway ve Vercel:</strong> uygulama
-              ve veritabanı bu altyapılarda barındırılır.
+              <strong className="text-gray-300">AWS ve Vercel:</strong> uygulama,
+              veritabanı ve site bu altyapılarda barındırılır.
             </li>
           </ul>
           <p>

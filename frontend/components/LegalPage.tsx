@@ -1,7 +1,7 @@
 import Link from "next/link"
 import SiteFooter from "@/components/SiteFooter"
 
-/** Yasal/içerik sayfaları için ortak kabuk (gizlilik, mesafeli satış, vb.). */
+/** Yasal/içerik sayfaları için ortak kabuk (gizlilik, hakkımızda, vb.). */
 export default function LegalPage({
   title,
   updatedAt,

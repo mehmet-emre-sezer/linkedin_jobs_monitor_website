@@ -11,9 +11,3 @@ export const COMPANY = {
   email: "iletisim@ispusulasi.com",
   website: "https://ispusulasi.com",
 } as const
-
-// Abonelik planı — fiyat sunucu tarafındaki config ile aynı tutulmalı.
-export const PLAN = {
-  priceTry: 79,
-  trialDays: 5,
-} as const
