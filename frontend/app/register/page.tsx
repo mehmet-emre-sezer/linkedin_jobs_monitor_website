@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import Link from "next/link"
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile"
 import { APP_NAME } from "@/constants/app"
 import { api, extractErrorMessage } from "@/lib/api"
 import RightPanel from "@/components/auth/RightPanel"
@@ -41,10 +42,16 @@ export default function RegisterPage() {
   const [submitted, setSubmitted]     = useState(false)
   const [loading, setLoading]         = useState(false)
   const [error, setError]             = useState("")
+  const [captchaToken, setCaptchaToken] = useState("")
+  const turnstileRef = useRef<TurnstileInstance>(null)
+
+  // Turnstile site key tanimli degilse (lokal) captcha atlanir.
+  const captchaSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
+  const captchaOk       = !captchaSiteKey || captchaToken.length > 0
 
   const allCriteriaMet  = passwordCriteria.every((c) => c.test(password))
   const passwordsMatch  = password === confirm && confirm.length > 0
-  const isFormValid     = email.includes("@") && allCriteriaMet && passwordsMatch
+  const isFormValid     = email.includes("@") && allCriteriaMet && passwordsMatch && captchaOk
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -52,10 +59,13 @@ export default function RegisterPage() {
     setError("")
     setLoading(true)
     try {
-      await api.post("/api/auth/register", { email, password })
+      await api.post("/api/auth/register", { email, password, turnstileToken: captchaToken })
       setSubmitted(true)
     } catch (err) {
       setError(extractErrorMessage(err))
+      // Token tek kullanimlik: hatadan sonra widget'i sifirla ki yeni token alinsin.
+      turnstileRef.current?.reset()
+      setCaptchaToken("")
     } finally {
       setLoading(false)
     }
@@ -157,6 +167,17 @@ export default function RegisterPage() {
                     <p className="text-xs text-red-400 mt-2">Şifreler eşleşmiyor</p>
                   )}
                 </div>
+
+                {captchaSiteKey && (
+                  <Turnstile
+                    ref={turnstileRef}
+                    siteKey={captchaSiteKey}
+                    onSuccess={setCaptchaToken}
+                    onExpire={() => setCaptchaToken("")}
+                    onError={() => setCaptchaToken("")}
+                    options={{ theme: "dark" }}
+                  />
+                )}
 
                 {error && (
                   <p className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded-xl px-4 py-3">{error}</p>

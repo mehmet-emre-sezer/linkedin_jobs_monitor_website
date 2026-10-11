@@ -6,6 +6,7 @@ import com.ispusulasi.backend.common.error.NotFoundException;
 import com.ispusulasi.backend.common.error.UnauthorizedException;
 import com.ispusulasi.backend.common.security.GoogleTokenVerifier;
 import com.ispusulasi.backend.common.security.JwtService;
+import com.ispusulasi.backend.common.turnstile.TurnstileClient;
 import com.ispusulasi.backend.user.web.LoginRequest;
 import com.ispusulasi.backend.user.web.LoginResponse;
 import com.ispusulasi.backend.user.web.RegisterRequest;
@@ -23,20 +24,27 @@ public class UserService {
     private final JwtService jwtService;
     private final AuthMailService authMailService;
     private final GoogleTokenVerifier googleTokenVerifier;
+    private final TurnstileClient turnstileClient;
 
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        JwtService jwtService,
                        AuthMailService authMailService,
-                       GoogleTokenVerifier googleTokenVerifier) {
+                       GoogleTokenVerifier googleTokenVerifier,
+                       TurnstileClient turnstileClient) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authMailService = authMailService;
         this.googleTokenVerifier = googleTokenVerifier;
+        this.turnstileClient = turnstileClient;
     }
 
     public UserResponse register(RegisterRequest request) {
+        // Bot korumasi: Turnstile token'i dogrula (secret ayarli degilse atlanir).
+        if (!turnstileClient.verify(request.turnstileToken())) {
+            throw new IllegalArgumentException("Doğrulama başarısız, lütfen tekrar deneyin.");
+        }
         if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new ConflictException("Bu email zaten kayıtlı: " + request.email());
         }

@@ -24,7 +24,7 @@ class AuthFlowIT {
     @Test
     void email_dogrulama_akisi() {
         String email = "verify_" + System.currentTimeMillis() + "@test.com";
-        userService.register(new RegisterRequest(email, "ilkParola123"));
+        userService.register(new RegisterRequest(email, "ilkParola123", null));
 
         User before = userRepository.findByEmail(email).orElseThrow();
         assertFalse(before.isEmailVerified(), "kayitta dogrulanmamis olmali");
@@ -39,7 +39,7 @@ class AuthFlowIT {
     @Test
     void parola_sifirlama_akisi() {
         String email = "reset_" + System.currentTimeMillis() + "@test.com";
-        userService.register(new RegisterRequest(email, "eskiParola123"));
+        userService.register(new RegisterRequest(email, "eskiParola123", null));
         User user = userRepository.findByEmail(email).orElseThrow();
 
         String token = jwtService.generatePurposeToken(
@@ -54,7 +54,7 @@ class AuthFlowIT {
     @Test
     void yanlis_amac_token_reddedilir() {
         String email = "wrong_" + System.currentTimeMillis() + "@test.com";
-        userService.register(new RegisterRequest(email, "parola12345"));
+        userService.register(new RegisterRequest(email, "parola12345", null));
         User user = userRepository.findByEmail(email).orElseThrow();
 
         // parola sifirlama token'iyle email dogrulama denenirse hata

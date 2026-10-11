@@ -25,7 +25,7 @@ class OnboardingAndDeleteIT {
     @Test
     void onboarding_tamamla_ve_hesap_sil_cascade() {
         String email = "del_" + System.currentTimeMillis() + "@test.com";
-        userService.register(new RegisterRequest(email, "parola12345"));
+        userService.register(new RegisterRequest(email, "parola12345", null));
         User user = userRepository.findByEmail(email).orElseThrow();
 
         // Profil olustur (PUT ile upsert)
